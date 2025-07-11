@@ -505,7 +505,7 @@ function BulletWeapon:simulateProjectile(firingPlayer, fireInfo, projectileIdx, 
 							   explodedPart.Parent ~= self.player.Character and
 							   self.weaponsSystem.playersOnDifferentTeams(self.weaponsSystem.getPlayerFromHumanoid(humanoid), self.player)
 							then
-								local headshotMultiplier = self:getConfigValue("HeadshotMultiplier", 1)
+								local headshotMultiplier = self:getConfigValue("HeadshotMultiplier", 2)
 								self.weaponsSystem.gui:OnHitOtherPlayer(self:calculateDamage(hitInfo.d), humanoid, headshotMultiplier)
 							end
 						end)
@@ -733,7 +733,7 @@ end
 
 function BulletWeapon:applyDamage(hitInfo)
 	local damage = self:calculateDamage(hitInfo.d)
-	local headshotMultiplier = self:getConfigValue("HeadshotMultiplier", 1)
+	local headshotMultiplier = self:getConfigValue("HeadshotMultiplier", 2)
 
 	if hitInfo.part.Name == "Head" then
 		damage = damage * headshotMultiplier
@@ -750,7 +750,7 @@ function BulletWeapon:onHit(hitInfo)
 	local hitPoint = hitInfo.p
 	local hitNormal = hitInfo.n
 	local hitPart = hitInfo.part
-	local headshotMultiplier = self:getConfigValue("HeadshotMultiplier", 1)
+	local headshotMultiplier = self:getConfigValue("HeadshotMultiplier", 2)
 
 	if hitPart and hitPart.Parent then
 		local humanoid = self.weaponsSystem.getHumanoid(hitPart)
