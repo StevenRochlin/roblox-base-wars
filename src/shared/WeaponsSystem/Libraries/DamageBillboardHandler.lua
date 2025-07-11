@@ -46,8 +46,18 @@ function DamageBillboardHandler:CreateBillboardForAdornee(adornee)
 	return billboard
 end
 
-function DamageBillboardHandler:ShowDamageBillboard(damageAmount, adornee)
+function DamageBillboardHandler:ShowDamageBillboard(damageAmount, adornee, textColor)
 	damageAmount = math.ceil(damageAmount)
+
+	-- Determine initial and target text colors (red when textColor provided)
+	local initialColor, targetColor
+	if textColor then
+		initialColor = Color3.new(textColor.R * 0.7, textColor.G * 0.7, textColor.B * 0.7)
+		targetColor = textColor
+	else
+		initialColor = Color3.new(0.7, 0.7, 0.7)
+		targetColor = Color3.new(1, 1, 1)
+	end
 
 	local billboard = self:CreateBillboardForAdornee(adornee)
 
@@ -61,7 +71,7 @@ function DamageBillboardHandler:ShowDamageBillboard(damageAmount, adornee)
 	damageNumber.Size = UDim2.fromScale(0,0.25)
 	damageNumber.Font = Enum.Font.GothamBlack
 	damageNumber.Text = tostring(damageAmount)
-	damageNumber.TextColor3 = Color3.new(0.7,0.7,0.7)
+	damageNumber.TextColor3 = initialColor
 	damageNumber.TextScaled = true
 	damageNumber.TextStrokeTransparency = 0
 	damageNumber.TextTransparency = 0
@@ -80,7 +90,7 @@ function DamageBillboardHandler:ShowDamageBillboard(damageAmount, adornee)
 		damageNumber,
 		appearTweenInfo, {
 			Size = UDim2.fromScale(1, damageNumber.Size.Y.Scale),
-			TextColor3 = Color3.new(1,1,1)
+			TextColor3 = targetColor
 		}
 	)
 

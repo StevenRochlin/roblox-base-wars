@@ -68,6 +68,11 @@ function WeaponsGui.new(weaponsSystem)
 		self.crosshairNormalSize = self.crosshairFrame.AbsoluteSize
 
 		self.hitMarker = self.scalingElementsFolder:WaitForChild("HitMarker"):WaitForChild("HitMarkerImage")
+		-- Cache original hit marker appearance
+		self.origHitMarkerAnchor = self.hitMarker.AnchorPoint
+		self.origHitMarkerPosition = self.hitMarker.Position
+		self.origHitMarkerSize = self.hitMarker.Size
+		self.origHitMarkerColor = self.hitMarker.ImageColor3
 
 		self.scopeFrame = self.gui:WaitForChild("Scope")
 		local scopeImage = self.scopeFrame:WaitForChild("ScopeImage")
@@ -281,15 +286,44 @@ function WeaponsGui:setCrosshairScale(scale)
 	SpringService:Target(self, self.crosshairDampingRatio, self.crosshairFrequency, { crosshairScale = self.crosshairScaleTarget })
 end
 
-function WeaponsGui:OnHitOtherPlayer(damage, humanoidHit, headshotMultiplier) -- show hit indicator, then fade
+function WeaponsGui:OnHitOtherPlayer(damage, humanoidHit, headshotMultiplier)
+	-- Reset hit marker to default appearance and alignment
+	self.hitMarker.AnchorPoint = self.origHitMarkerAnchor
+	self.hitMarker.Position = self.origHitMarkerPosition
+	self.hitMarker.ImageColor3 = self.origHitMarkerColor
+	self.hitMarker.Size = self.origHitMarkerSize
+
+	-- Determine if this was a headshot
+	local isHeadshot = headshotMultiplier > 1
+	if isHeadshot then
+		-- Center hit marker on screen for headshots
+		self.hitMarker.AnchorPoint = Vector2.new(0.5, 0.5)
+		self.hitMarker.Position = UDim2.fromScale(0.5, 0.5)
+		-- Red & enlarge the marker for headshots
+		self.hitMarker.ImageColor3 = Color3.new(1, 0, 0)
+		local scaleFactor = 1.5
+		self.hitMarker.Size = UDim2.new(
+			self.origHitMarkerSize.X.Scale * scaleFactor,
+			self.origHitMarkerSize.X.Offset * scaleFactor,
+			self.origHitMarkerSize.Y.Scale * scaleFactor,
+			self.origHitMarkerSize.Y.Offset * scaleFactor
+		)
+	end
+
+	-- Show & fade the hit marker
 	self.hitMarker.ImageTransparency = 0
 	local tweenInfo = TweenInfo.new(0.8)
-	local goal = {}
-	goal.ImageTransparency = 1
+	local goal = { ImageTransparency = 1 }
 	local tween = TweenService:Create(self.hitMarker, tweenInfo, goal)
 	tween:Play()
 
-	DamageBillboardHandler:ShowDamageBillboard(damage * headshotMultiplier, humanoidHit.Parent:FindFirstChild("Head"))
+	-- Show floating damage number (red for headshots)
+	local headPart = humanoidHit.Parent:FindFirstChild("Head")
+	if isHeadshot then
+		DamageBillboardHandler:ShowDamageBillboard(damage * headshotMultiplier, headPart, Color3.new(1, 0, 0))
+	else
+		DamageBillboardHandler:ShowDamageBillboard(damage, headPart)
+	end
 end
 
 function WeaponsGui:onRenderStepped(dt)
