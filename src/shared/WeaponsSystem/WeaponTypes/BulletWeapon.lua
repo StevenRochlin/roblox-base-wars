@@ -768,7 +768,8 @@ function BulletWeapon:onHit(hitInfo)
 			self.weaponsSystem.playersOnDifferentTeams(self.weaponsSystem.getPlayerFromHumanoid(hitInfo.h), self.player)
 		then
 			-- Show hit indicators on gui of client that shot projectile if players are not on same team
-			self.weaponsSystem.gui:OnHitOtherPlayer(self:calculateDamage(hitInfo.d), hitInfo.h, headshotMultiplier)
+			local guiMultiplier = (hitPart.Name == "Head") and headshotMultiplier or 1
+			self.weaponsSystem.gui:OnHitOtherPlayer(self:calculateDamage(hitInfo.d), hitInfo.h, guiMultiplier)
 		end
 	end
 
