@@ -4,9 +4,7 @@ print("ClassManager loaded")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- /////////////////////////////////////////////////////////////////
 -- Remote events setup
--- /////////////////////////////////////////////////////////////////
 local remotesFolder = ReplicatedStorage:FindFirstChild("ClassRemotes")
 if not remotesFolder then
     remotesFolder = Instance.new("Folder")
@@ -27,39 +25,12 @@ end
 local RequestClassEquip = getOrCreateRemote("RequestClassEquip")
 local FireAbility       = getOrCreateRemote("FireAbility")
 
--- /////////////////////////////////////////////////////////////////
 -- Shared modules
--- /////////////////////////////////////////////////////////////////
-local ClassConfig       = require(ReplicatedStorage:WaitForChild("ClassConfig"))
-local AbilityRegistry   = require(ReplicatedStorage:WaitForChild("AbilityRegistry"))
--- Folder where class items are stored
-local ClassItemsFolder  = ReplicatedStorage:WaitForChild("ClassItems")
+local ClassConfig      = require(ReplicatedStorage:WaitForChild("ClassConfig"))
+local AbilityRegistry  = require(ReplicatedStorage:WaitForChild("AbilityRegistry"))
+local ClassItemsFolder = ReplicatedStorage:WaitForChild("ClassItems")
 
--- /////////////////////////////////////////////////////////////////
--- Helper: give tool from ClassItems folder instead of Assets.Tools
--- /////////////////////////////////////////////////////////////////
-local function giveTool(player, toolName)
-    local template = ClassItemsFolder:FindFirstChild(toolName)
-    if not template then
-        warn("[ClassManager] Missing class item: " .. toolName)
-        return
-    end
-
-    local tool = template:Clone()
-    tool.Parent = player.Backpack
-
-    local starterGear = player:FindFirstChild("StarterGear")
-    if not starterGear then
-        starterGear = Instance.new("Folder")
-        starterGear.Name = "StarterGear"
-        starterGear.Parent = player
-    end
-    template:Clone().Parent = starterGear
-end
-
--- /////////////////////////////////////////////////////////////////
--- Equip class tier (only Archer tier 0 for now)
--- /////////////////////////////////////////////////////////////////
+-- Equip class tier
 local function equipClass(player, className, tier)
     tier = tier or 0
     local config = ClassConfig[className]
@@ -88,10 +59,15 @@ local function equipClass(player, className, tier)
         if tool:IsA("Tool") then tool:Destroy() end
     end
 
-    -- give new tool(s)
-    local loadout = tierData.Loadout
-    if loadout and loadout.Tool then
-        giveTool(player, loadout.Tool)
+    -- Give starter tool from class Loadout
+    if tierData.Loadout and tierData.Loadout.Tool then
+        local toolName = tierData.Loadout.Tool
+        local template = ClassItemsFolder:FindFirstChild(toolName)
+        if template then
+            template:Clone().Parent = player.Backpack
+        else
+            warn("[ClassManager] Missing tool template: " .. toolName)
+        end
     end
 
     -- Tag player attributes
@@ -99,15 +75,11 @@ local function equipClass(player, className, tier)
     player:SetAttribute("ClassTier", tier)
 end
 
--- /////////////////////////////////////////////////////////////////
--- Player setup
--- /////////////////////////////////////////////////////////////////
+-- Player setup: auto-equip
 local function onPlayerAdded(player)
-    -- auto-equip Archer tier 0 for now
     player.CharacterAdded:Connect(function()
         equipClass(player, "Archer", 0)
     end)
-
     if player.Character then
         equipClass(player, "Archer", 0)
     end
@@ -118,24 +90,15 @@ for _, p in ipairs(Players:GetPlayers()) do
     onPlayerAdded(p)
 end
 
--- /////////////////////////////////////////////////////////////////
--- Handle equip requests (future-proof)
--- /////////////////////////////////////////////////////////////////
+-- Handle equip requests
 RequestClassEquip.OnServerEvent:Connect(function(player, className, tier)
-    equipClass(player, className, tier or 0)
+    equipClass(player, className, tier)
 end)
 
--- /////////////////////////////////////////////////////////////////
--- Ability handling (simple proxy to registry)
--- /////////////////////////////////////////////////////////////////
-local playerCooldowns = {}
-
+-- Ability handling
 FireAbility.OnServerEvent:Connect(function(player, abilityName, payload)
     local ability = AbilityRegistry[abilityName]
-    if not ability then return end
-
-    -- cooldown handling in ability module (Roll.lua) already, but keep placeholder
-    if ability.ServerActivate then
+    if ability and ability.ServerActivate then
         ability.ServerActivate(player, payload)
     end
 end) 
