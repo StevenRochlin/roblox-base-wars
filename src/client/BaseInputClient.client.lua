@@ -558,6 +558,47 @@ end)
 -- =========================================================================--
 -- 7) SHOP BUTTON CALLBACKS
 -- =========================================================================--
+-- Double-jump passive for Ninja (max 2 air jumps, with cooldown)
+do
+    local maxJumps = 2
+    local jumpCooldown = 0.1
+    local jumpCount = 0
+    local canJump = false
+
+    local function onStateChanged(_, newState)
+        if player:GetAttribute("ClassName") ~= "Ninja" then return end
+        if newState == Enum.HumanoidStateType.Landed then
+            jumpCount = 0
+            canJump = false
+        elseif newState == Enum.HumanoidStateType.Freefall then
+            wait(jumpCooldown)
+            canJump = true
+        elseif newState == Enum.HumanoidStateType.Jumping then
+            canJump = false
+            jumpCount = jumpCount + 1
+        end
+    end
+
+    local function onJumpRequest()
+        if player:GetAttribute("ClassName") ~= "Ninja" then return end
+        if canJump and jumpCount < maxJumps then
+            local char = player.Character
+            local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end
+
+    player.CharacterAdded:Connect(function(char)
+        jumpCount = 0
+        canJump = false
+        local humanoid = char:WaitForChild("Humanoid")
+        humanoid.StateChanged:Connect(onStateChanged)
+    end)
+
+    UserInputService.JumpRequest:Connect(onJumpRequest)
+end
 
 
 
