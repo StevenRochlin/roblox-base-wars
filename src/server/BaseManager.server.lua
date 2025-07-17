@@ -8,6 +8,9 @@ local RunService                = game:GetService("RunService")
 
 -- Remote events
 local RequestBaseCreation       = ReplicatedStorage:WaitForChild("RequestBaseCreation")
+local BasePlacementError        = ReplicatedStorage:FindFirstChild("BasePlacementError") or Instance.new("RemoteEvent")
+BasePlacementError.Name = "BasePlacementError"
+BasePlacementError.Parent = ReplicatedStorage
 local UpdateBaseEntryGUI        = ReplicatedStorage:WaitForChild("UpdateBaseEntryGUI")
 local OpenBaseShop              = ReplicatedStorage:WaitForChild("OpenBaseShop")
 local ChangeStealAmount         = ReplicatedStorage:WaitForChild("ChangeStealSpeed")  -- uses ChangeStealSpeed remote event
@@ -169,13 +172,30 @@ RequestBaseCreation.OnServerEvent:Connect(function(player)
 		return
 	end
 
-	-- Init data/state
+	-- Check minimal distance to other bases BEFORE creating base
+	local MIN_EXTRA_SEPARATION = 15
+	local BASE_RADIUS = 9 -- diameter 18
+	local char = player.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	local desiredPos = hrp.Position
+
+	for otherId, data in pairs(playerBasesData) do
+		if data.basePart then
+			local dist = (data.basePart.Position - desiredPos).Magnitude
+			if dist < (BASE_RADIUS*2 + MIN_EXTRA_SEPARATION) then
+				-- too close
+				BasePlacementError:FireClient(player, "TooClose")
+				return
+			end
+		end
+	end
+
+	-- Init data/state AFTER passing proximity check
 	playerBasesData[userId]  = { storedGold = 0, ownerName = player.Name }
 	playerBaseStates[userId] = { isTouchingBase = false, touchStartTime = 0,
 		isInDefinitiveBaseState = false, character = nil, originalTransparency = {} }
-
-	-- mark that player now has a base
-	player:SetAttribute("HasBase", true)
 
 	local char = player.Character
 	local hrp  = char and char:FindFirstChild("HumanoidRootPart")
@@ -360,6 +380,8 @@ RequestBaseCreation.OnServerEvent:Connect(function(player)
 	end)
 
 	print("[BaseManager] Base created for " .. player.Name)
+	-- mark that player now has a base (successful)
+	player:SetAttribute("HasBase", true)
 end)
 
 -- RunService loop to complete base entry

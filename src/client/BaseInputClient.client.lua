@@ -17,6 +17,7 @@ local playerGui           = player:WaitForChild("PlayerGui")
 local RequestBaseCreation = ReplicatedStorage:WaitForChild("RequestBaseCreation")
 local DisplayBasePrompt   = ReplicatedStorage:WaitForChild("DisplayBasePrompt")
 local UpdateBaseEntryGUI  = ReplicatedStorage:WaitForChild("UpdateBaseEntryGUI")
+local BasePlacementError = ReplicatedStorage:WaitForChild("BasePlacementError")
 
 -- new shop remotes
 local OpenBaseShop        = ReplicatedStorage:WaitForChild("OpenBaseShop")
@@ -471,6 +472,41 @@ end
 -- =========================================================================--
 -- 5) REMOTE EVENT CONNECTIONS
 -- =========================================================================--
+
+-- Error prompt for invalid placement
+local function showError()
+	local errGui = Instance.new("ScreenGui")
+	errGui.Name = "BaseErrorGui"
+	errGui.ResetOnSpawn = false
+	errGui.DisplayOrder = 6
+	errGui.Parent = playerGui
+
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = UDim2.new(0.7,0,0.12,0) -- slightly wider and taller
+	lbl.Position = UDim2.new(0.5,0,0.6,0) -- move a bit higher on screen
+	lbl.AnchorPoint = Vector2.new(0.5,0.5)
+	lbl.TextColor3 = Color3.fromRGB(255,0,0)
+	lbl.BackgroundTransparency = 1
+	lbl.TextScaled = true
+	lbl.Font = Enum.Font.SourceSansBold
+	lbl.Text = "This Spot is Too Close to an Enemy Base"
+	lbl.Parent = errGui
+
+	-- auto-destroy after 2 seconds
+	task.delay(2, function()
+		if errGui then errGui:Destroy() end
+	end)
+
+	-- re-show placement prompt and allow retry
+	showPrompt()
+	baseCreationAttempted = false
+end
+
+BasePlacementError.OnClientEvent:Connect(function(reason)
+	if reason == "TooClose" then
+		showError()
+	end
+end)
 
 -- A) Open shop UI when server tells us
 OpenBaseShop.OnClientEvent:Connect(function()
