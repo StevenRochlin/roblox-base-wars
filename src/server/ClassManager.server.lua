@@ -35,6 +35,27 @@ local AbilityRegistry   = require(ReplicatedStorage:WaitForChild("AbilityRegistr
 -- Folder where class items are stored
 local ClassItemsFolder  = ReplicatedStorage:WaitForChild("ClassItems")
 
+-- Folder that contains HumanoidDescription objects named after classes
+local ClassAvatarsFolder = ReplicatedStorage:FindFirstChild("ClassAvatars")
+
+-- /////////////////////////////////////////////////////////////////
+-- Helper: apply avatar
+-- /////////////////////////////////////////////////////////////////
+local function applyAvatar(player, className)
+	if not ClassAvatarsFolder then return end
+	local desc = ClassAvatarsFolder:FindFirstChild(className)
+	if not desc or not desc:IsA("HumanoidDescription") then return end
+
+	local char = player.Character
+	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		-- Apply the avatar description safely
+		pcall(function()
+			humanoid:ApplyDescription(desc)
+		end)
+	end
+end
+
 -- /////////////////////////////////////////////////////////////////
 -- Helper: give tool from ClassItems folder instead of Assets.Tools
 -- /////////////////////////////////////////////////////////////////
@@ -93,6 +114,9 @@ local function equipClass(player, className, tier)
     if loadout and loadout.Tool then
         giveTool(player, loadout.Tool)
     end
+
+    -- apply avatar/skin
+    applyAvatar(player, className)
 
     -- Tag player attributes
     player:SetAttribute("ClassName", className)

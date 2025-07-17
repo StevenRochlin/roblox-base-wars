@@ -595,3 +595,22 @@ Players.PlayerRemoving:Connect(function(player)
 	playerBaseStates[player.UserId] = nil
 	playerBasesData[player.UserId]  = nil
 end)
+
+-- /////////////////////////////////////////////////////////////////
+-- Player respawn handling: spawn at own base if it exists
+-- /////////////////////////////////////////////////////////////////
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(char)
+		-- small delay to ensure HumanoidRootPart exists and physics ready
+		char:WaitForChild("HumanoidRootPart", 3)
+		task.wait(0.1)
+		local data = playerBasesData[player.UserId]
+		if data and data.basePart then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				local spawnPos = data.basePart.Position + Vector3.new(0, (data.basePart.Size.Y/2) + 3, 0)
+				hrp.CFrame = CFrame.new(spawnPos)
+			end
+		end
+	end)
+end)
