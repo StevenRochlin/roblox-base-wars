@@ -178,16 +178,29 @@ RequestBaseCreation.OnServerEvent:Connect(function(player)
 	local hrp  = char and char:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
 
+	-- Determine placement position: if player is in the air, drop base to ground below
+	local BASE_DIAMETER = 18
+	local BASE_RADIUS   = BASE_DIAMETER/2
+	local rayParams = RaycastParams.new()
+	rayParams.FilterType = Enum.RaycastFilterType.Exclude
+	rayParams.FilterDescendantsInstances = {char}
+	local rayResult = Workspace:Raycast(hrp.Position, Vector3.new(0,-1000,0), rayParams)
+	local basePosition = hrp.Position
+	if rayResult then
+		-- lower by roughly one character height plus an extra stud (~6)
+		basePosition = rayResult.Position + Vector3.new(0, BASE_RADIUS - 6, 0)
+	end
+
 	-- Outer base
 	local basePart = Instance.new("Part")
 	basePart.Name         = player.Name .. "_Base"
 	basePart.Shape        = Enum.PartType.Ball
-	basePart.Size         = Vector3.new(18,18,18)
+	basePart.Size         = Vector3.new(BASE_DIAMETER, BASE_DIAMETER, BASE_DIAMETER)
 	basePart.Color        = Color3.fromRGB(128,0,128)
 	basePart.Transparency = 0.5
 	basePart.Anchored     = true
 	basePart.CanCollide   = false
-	basePart.Position     = hrp.Position
+	basePart.Position     = basePosition
 	basePart.Parent       = playerBasesFolder
 	playerBasesData[userId].basePart = basePart
 
@@ -221,7 +234,7 @@ RequestBaseCreation.OnServerEvent:Connect(function(player)
 	baseCore.Transparency = 0.5
 	baseCore.Anchored     = true
 	baseCore.CanCollide   = false
-	baseCore.Position     = hrp.Position + Vector3.new(0,-3,0)
+	baseCore.Position     = basePosition + Vector3.new(0,-3,0)
 	baseCore.Parent       = playerBasesFolder
 	playerBasesData[userId].baseCore = baseCore
 
