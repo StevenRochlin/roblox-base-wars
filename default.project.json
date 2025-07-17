@@ -9,6 +9,14 @@
     },
 
     "ReplicatedStorage": {
+      "RequestBaseCreation": { "$className": "RemoteEvent" },
+      "DisplayBasePrompt": { "$className": "RemoteEvent" },
+      "UpdateBaseEntryGUI": { "$className": "RemoteEvent" },
+      "OpenBaseShop": { "$className": "RemoteEvent" },
+      "ChangeStealSpeed": { "$className": "RemoteEvent" },
+      "ChangeMineSpeed": { "$className": "RemoteEvent" },
+      "ChangeEntryTime": { "$className": "RemoteEvent" },
+      "ChangeStorageSize": { "$className": "RemoteEvent" },
       "$className": "ReplicatedStorage",
       "$path": "src/shared"
     },

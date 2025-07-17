@@ -1,0 +1,537 @@
+-- BaseInputClient.lua (StarterPlayerScripts)
+print("BaseInputClient loaded")
+
+-- =========================================================================--
+-- 1) SERVICES & REMOTES
+-- =========================================================================--
+print("BaseInputClient.luau loaded")
+local UserInputService    = game:GetService("UserInputService")
+local ReplicatedStorage   = game:GetService("ReplicatedStorage")
+local Players             = game:GetService("Players")
+local RunService          = game:GetService("RunService")
+
+local player              = Players.LocalPlayer
+local playerGui           = player:WaitForChild("PlayerGui")
+
+-- existing remotes
+local RequestBaseCreation = ReplicatedStorage:WaitForChild("RequestBaseCreation")
+local DisplayBasePrompt   = ReplicatedStorage:WaitForChild("DisplayBasePrompt")
+local UpdateBaseEntryGUI  = ReplicatedStorage:WaitForChild("UpdateBaseEntryGUI")
+
+-- new shop remotes
+local OpenBaseShop        = ReplicatedStorage:WaitForChild("OpenBaseShop")
+local ChangeStealSpeed    = ReplicatedStorage:WaitForChild("ChangeStealSpeed")
+local ChangeMineSpeed     = ReplicatedStorage:WaitForChild("ChangeMineSpeed")
+local ChangeEntryTime     = ReplicatedStorage:WaitForChild("ChangeEntryTime")
+local ChangeStorageSize   = ReplicatedStorage:WaitForChild("ChangeStorageSize")
+
+-- upgrade configuration
+local stealBaseIncrement = 10
+local stealUpgradeCosts = {30, 50, 80}
+local purpleColor = Color3.fromRGB(128, 0, 128)
+local orangeColor = Color3.fromRGB(255, 165, 0)
+local mineBaseIncrement = 1
+local mineUpgradeCosts = {40, 60, 90}
+local skyBlueColor = Color3.fromRGB(135, 206, 235)
+local entryTimeDecrement  = 0.5
+local entryUpgradeCosts   = {80, 160, 320}
+local turquoiseColor      = Color3.fromRGB(64, 224, 208)
+local storageLevels       = {100, 150, 230, 350}
+local storageColors       = {
+	[1] = Color3.new(1,1,1),
+	[2] = Color3.fromRGB(0,255,0),
+	[3] = Color3.fromRGB(0,0,255),
+	[4] = Color3.fromRGB(128,0,128),
+}
+local goldColor           = Color3.fromRGB(255, 215, 0)
+
+-- =========================================================================--
+-- 2) STATE VARIABLES
+-- =========================================================================--
+local baseCreationAttempted = false
+local promptGui             = nil
+
+-- timer state
+local entryTimerConnection    = nil
+local serverEntryStartTime    = 0
+local entryDuration           = 0
+
+-- =========================================================================--
+-- 3) GUI CREATION
+-- =========================================================================--
+
+-- 3A) Base-entry GUI (timer + status)
+local baseEntryGui = Instance.new("ScreenGui")
+baseEntryGui.Name            = "BaseEntryGui"
+baseEntryGui.ResetOnSpawn    = false
+baseEntryGui.ZIndexBehavior  = Enum.ZIndexBehavior.Sibling
+baseEntryGui.DisplayOrder    = 10
+baseEntryGui.Parent          = playerGui
+
+local entryTimerLabel = Instance.new("TextLabel")
+entryTimerLabel.Name             = "EntryTimerLabel"
+entryTimerLabel.Size             = UDim2.new(0.25,0,0.05,0)
+entryTimerLabel.Position         = UDim2.new(0.5,0,0.85,0)
+entryTimerLabel.AnchorPoint      = Vector2.new(0.5,0.5)
+entryTimerLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
+entryTimerLabel.BackgroundTransparency = 0.2
+entryTimerLabel.TextColor3       = Color3.fromRGB(220,220,220)
+entryTimerLabel.Font             = Enum.Font.SourceSansSemibold
+entryTimerLabel.TextScaled       = true
+entryTimerLabel.Visible          = false
+entryTimerLabel.Text             = "Entering Base: 0.0s"
+entryTimerLabel.Parent           = baseEntryGui
+
+local baseStatusLabel = Instance.new("TextLabel")
+baseStatusLabel.Name             = "BaseStatusLabel"
+baseStatusLabel.Size             = UDim2.new(0.3,0,0.08,0)
+baseStatusLabel.Position         = UDim2.new(0.5,0,0.78,0)
+baseStatusLabel.AnchorPoint      = Vector2.new(0.5,0.5)
+baseStatusLabel.BackgroundColor3 = Color3.fromRGB(20,80,20)
+baseStatusLabel.BackgroundTransparency = 0.1
+baseStatusLabel.TextColor3       = Color3.fromRGB(180,255,180)
+baseStatusLabel.Font             = Enum.Font.SourceSansBold
+baseStatusLabel.TextScaled       = true
+baseStatusLabel.Visible          = false
+baseStatusLabel.Text             = "You have entered your base"
+baseStatusLabel.Parent           = baseEntryGui
+
+-- 3B) Shop GUI (hidden until opened)
+local shopGui = Instance.new("ScreenGui")
+shopGui.Name         = "BaseShopGui"
+shopGui.ResetOnSpawn = false
+shopGui.Enabled      = false
+shopGui.Parent       = playerGui
+
+local shopFrame = Instance.new("Frame")
+shopFrame.Size               = UDim2.new(0,300,0,200)
+shopFrame.Position           = UDim2.new(0.5,-150,0.5,-100)
+shopFrame.BackgroundColor3   = Color3.fromRGB(30,30,30)
+shopFrame.BackgroundTransparency = 0.3
+shopFrame.Parent             = shopGui
+
+-- Close button (top‐right corner)
+local closeBtn = Instance.new("TextButton")
+closeBtn.Name               = "CloseButton"
+closeBtn.Size               = UDim2.new(0, 24, 0, 24)
+closeBtn.Position           = UDim2.new(1, -30, 0, 6)
+closeBtn.AnchorPoint        = Vector2.new(0, 0)
+closeBtn.BackgroundColor3   = Color3.fromRGB(60, 60, 60)
+closeBtn.TextColor3         = Color3.fromRGB(255, 255, 255)
+closeBtn.Font               = Enum.Font.SourceSansBold
+closeBtn.Text               = "✕"
+closeBtn.AutoButtonColor    = true
+closeBtn.Parent             = shopFrame
+
+closeBtn.MouseButton1Click:Connect(function()
+	shopGui.Enabled = false
+end)
+
+
+local title = Instance.new("TextLabel")
+title.Size                 = UDim2.new(1,0,0,30)
+title.BackgroundTransparency = 1
+title.Text                 = "Base Shop"
+title.Font                 = Enum.Font.SourceSansBold
+title.TextScaled           = true
+title.Parent               = shopFrame
+
+local fastStealBtn = Instance.new("TextButton")
+fastStealBtn.Size = UDim2.new(0,120,0,60)
+fastStealBtn.Position = UDim2.new(0,10,0,50)
+fastStealBtn.BackgroundColor3 = purpleColor
+fastStealBtn.BorderSizePixel = 0
+fastStealBtn.Parent = shopFrame
+
+local stealLabel = Instance.new("TextLabel")
+stealLabel.Name = "StealUpgradeTitle"
+stealLabel.Size = UDim2.new(1,0,0,20)
+stealLabel.Position = UDim2.new(0,0,0,0)
+stealLabel.BackgroundTransparency = 1
+stealLabel.Text = "Gold Steal Amount"
+stealLabel.Font = Enum.Font.SourceSansBold
+stealLabel.TextColor3 = purpleColor
+stealLabel.TextStrokeColor3 = Color3.new(0,0,0)
+stealLabel.TextStrokeTransparency = 0
+stealLabel.TextScaled = true
+stealLabel.Parent = fastStealBtn
+
+local stealCostLabel = Instance.new("TextLabel")
+stealCostLabel.Name = "StealUpgradeCost"
+stealCostLabel.Size = UDim2.new(1,0,0,20)
+stealCostLabel.Position = UDim2.new(0,0,1,-20)
+stealCostLabel.BackgroundTransparency = 1
+stealCostLabel.Text = ""
+stealCostLabel.Font = Enum.Font.SourceSansBold
+stealCostLabel.TextColor3 = orangeColor
+stealCostLabel.TextStrokeColor3 = Color3.new(0,0,0)
+stealCostLabel.TextStrokeTransparency = 0
+stealCostLabel.TextScaled = true
+stealCostLabel.Parent = fastStealBtn
+
+-- New level label under title
+local levelLabel = Instance.new("TextLabel")
+levelLabel.Name = "StealUpgradeLevel"
+levelLabel.Size = UDim2.new(1,0,0,20)
+levelLabel.Position = UDim2.new(0,0,0,20)
+levelLabel.BackgroundTransparency = 1
+levelLabel.Text = "[Lvl 1]"
+levelLabel.Font = Enum.Font.SourceSansBold
+levelLabel.TextColor3 = Color3.new(1,1,1)
+levelLabel.TextStrokeColor3 = Color3.new(0,0,0)
+levelLabel.TextStrokeTransparency = 0
+levelLabel.TextScaled = true
+levelLabel.Parent = fastStealBtn
+
+fastStealBtn.MouseButton1Click:Connect(function()
+	ChangeStealSpeed:FireServer(stealBaseIncrement)
+end)
+
+local function updateStealUpgradeButton()
+	local amt = player:GetAttribute("StealAmount") or stealBaseIncrement
+	local level = amt / stealBaseIncrement
+	local cost = stealUpgradeCosts[level] or stealUpgradeCosts[#stealUpgradeCosts]
+	stealCostLabel.Text = cost .. " Gold"
+	levelLabel.Text = "[Lvl " .. level .. "]"
+end
+updateStealUpgradeButton()
+player:GetAttributeChangedSignal("StealAmount"):Connect(updateStealUpgradeButton)
+
+-- New auto miner upgrade button
+local autoMineBtn = Instance.new("TextButton")
+autoMineBtn.Size = UDim2.new(0,120,0,60)
+autoMineBtn.Position = UDim2.new(0,140,0,50)
+autoMineBtn.BackgroundColor3 = skyBlueColor
+autoMineBtn.BorderSizePixel = 0
+autoMineBtn.Parent = shopFrame
+
+local autoMineTitle = Instance.new("TextLabel")
+autoMineTitle.Name = "AutoMineTitle"
+autoMineTitle.Size = UDim2.new(1,0,0,20)
+autoMineTitle.Position = UDim2.new(0,0,0,0)
+autoMineTitle.BackgroundTransparency = 1
+autoMineTitle.Text = "Auto Gold Miner"
+autoMineTitle.Font = Enum.Font.SourceSansBold
+autoMineTitle.TextColor3 = skyBlueColor
+autoMineTitle.TextStrokeColor3 = Color3.new(0,0,0)
+autoMineTitle.TextStrokeTransparency = 0
+autoMineTitle.TextScaled = true
+autoMineTitle.Parent = autoMineBtn
+
+local autoMineLevelLabel = Instance.new("TextLabel")
+autoMineLevelLabel.Name = "AutoMineLevel"
+autoMineLevelLabel.Size = UDim2.new(1,0,0,20)
+autoMineLevelLabel.Position = UDim2.new(0,0,0,20)
+autoMineLevelLabel.BackgroundTransparency = 1
+autoMineLevelLabel.Text = "[Lvl 0]"
+autoMineLevelLabel.Font = Enum.Font.SourceSansBold
+autoMineLevelLabel.TextColor3 = Color3.new(1,1,1)
+autoMineLevelLabel.TextStrokeColor3 = Color3.new(0,0,0)
+autoMineLevelLabel.TextStrokeTransparency = 0
+autoMineLevelLabel.TextScaled = true
+autoMineLevelLabel.Parent = autoMineBtn
+
+local autoMineCostLabel = Instance.new("TextLabel")
+autoMineCostLabel.Name = "AutoMineCost"
+autoMineCostLabel.Size = UDim2.new(1,0,0,20)
+autoMineCostLabel.Position = UDim2.new(0,0,1,-20)
+autoMineCostLabel.BackgroundTransparency = 1
+autoMineCostLabel.Text = ""
+autoMineCostLabel.Font = Enum.Font.SourceSansBold
+autoMineCostLabel.TextColor3 = orangeColor
+autoMineCostLabel.TextStrokeColor3 = Color3.new(0,0,0)
+autoMineCostLabel.TextStrokeTransparency = 0
+autoMineCostLabel.TextScaled = true
+autoMineCostLabel.Parent = autoMineBtn
+
+autoMineBtn.MouseButton1Click:Connect(function()
+	ChangeMineSpeed:FireServer(mineBaseIncrement)
+end)
+
+local function updateAutoMineButton()
+	local rate = player:GetAttribute("MineSpeed") or 0
+	local level = rate
+	local costIndex = level + 1
+	local cost = mineUpgradeCosts[costIndex] or mineUpgradeCosts[#mineUpgradeCosts]
+	autoMineLevelLabel.Text = "[Lvl " .. level .. "]"
+	autoMineCostLabel.Text = cost .. " Gold"
+end
+updateAutoMineButton()
+player:GetAttributeChangedSignal("MineSpeed"):Connect(updateAutoMineButton)
+
+-- Entry Time upgrade button
+local entryBtn = Instance.new("TextButton")
+entryBtn.Size = UDim2.new(0,120,0,60)
+entryBtn.Position = UDim2.new(0,10,0,120)
+entryBtn.BackgroundColor3 = turquoiseColor
+entryBtn.BorderSizePixel = 0
+entryBtn.Parent = shopFrame
+
+local entryTitle = Instance.new("TextLabel")
+entryTitle.Name = "EntryUpgradeTitle"
+entryTitle.Size = UDim2.new(1,0,0,20)
+entryTitle.Position = UDim2.new(0,0,0,0)
+entryTitle.BackgroundTransparency = 1
+entryTitle.Text = "Entry Time"
+entryTitle.Font = Enum.Font.SourceSansBold
+entryTitle.TextColor3 = turquoiseColor
+entryTitle.TextStrokeColor3 = Color3.new(0,0,0)
+entryTitle.TextStrokeTransparency = 0
+entryTitle.TextScaled = true
+entryTitle.Parent = entryBtn
+
+local entryLevelLabel = Instance.new("TextLabel")
+entryLevelLabel.Name = "EntryUpgradeLevel"
+entryLevelLabel.Size = UDim2.new(1,0,0,20)
+entryLevelLabel.Position = UDim2.new(0,0,0,20)
+entryLevelLabel.BackgroundTransparency = 1
+entryLevelLabel.Text = "[Lvl 0]"
+entryLevelLabel.Font = Enum.Font.SourceSansBold
+entryLevelLabel.TextColor3 = Color3.new(1,1,1)
+entryLevelLabel.TextStrokeColor3 = Color3.new(0,0,0)
+entryLevelLabel.TextStrokeTransparency = 0
+entryLevelLabel.TextScaled = true
+entryLevelLabel.Parent = entryBtn
+
+local entryCostLabel = Instance.new("TextLabel")
+entryCostLabel.Name = "EntryUpgradeCost"
+entryCostLabel.Size = UDim2.new(1,0,0,20)
+entryCostLabel.Position = UDim2.new(0,0,1,-20)
+entryCostLabel.BackgroundTransparency = 1
+entryCostLabel.Text = ""
+entryCostLabel.Font = Enum.Font.SourceSansBold
+entryCostLabel.TextColor3 = orangeColor
+entryCostLabel.TextStrokeColor3 = Color3.new(0,0,0)
+entryCostLabel.TextStrokeTransparency = 0
+entryCostLabel.TextScaled = true
+entryCostLabel.Parent = entryBtn
+
+entryBtn.MouseButton1Click:Connect(function()
+	ChangeEntryTime:FireServer(entryTimeDecrement)
+end)
+
+local function updateEntryButton()
+	local level = player:GetAttribute("EntryLevel") or 0
+	local cost = entryUpgradeCosts[level + 1] or entryUpgradeCosts[#entryUpgradeCosts]
+	entryLevelLabel.Text = "[Lvl " .. level .. "]"
+	entryCostLabel.Text = cost .. " Gold"
+end
+updateEntryButton()
+player:GetAttributeChangedSignal("EntryLevel"):Connect(updateEntryButton)
+
+-- Gold Storage upgrade button
+local storageBtn = Instance.new("TextButton")
+storageBtn.Size = UDim2.new(0,120,0,60)
+storageBtn.Position = UDim2.new(0,140,0,120)
+storageBtn.BackgroundColor3 = goldColor
+storageBtn.BorderSizePixel = 0
+storageBtn.Parent = shopFrame
+
+local storageTitle = Instance.new("TextLabel")
+storageTitle.Name = "StorageUpgradeTitle"
+storageTitle.Size = UDim2.new(1,0,0,20)
+storageTitle.Position = UDim2.new(0,0,0,0)
+storageTitle.BackgroundTransparency = 1
+storageTitle.Text = "Max Storage"
+storageTitle.Font = Enum.Font.SourceSansBold
+storageTitle.TextColor3 = Color3.new(1,1,1)
+storageTitle.TextStrokeColor3 = Color3.new(0,0,0)
+storageTitle.TextStrokeTransparency = 0
+storageTitle.TextScaled = true
+storageTitle.Parent = storageBtn
+
+local storageLevelLabel = Instance.new("TextLabel")
+storageLevelLabel.Name = "StorageUpgradeLevel"
+storageLevelLabel.Size = UDim2.new(1,0,0,20)
+storageLevelLabel.Position = UDim2.new(0,0,0,20)
+storageLevelLabel.BackgroundTransparency = 1
+storageLevelLabel.Text = "[Lvl 1]"
+storageLevelLabel.Font = Enum.Font.SourceSansBold
+storageLevelLabel.TextColor3 = Color3.new(1,1,1)
+storageLevelLabel.TextStrokeColor3 = Color3.new(0,0,0)
+storageLevelLabel.TextStrokeTransparency = 0
+storageLevelLabel.TextScaled = true
+storageLevelLabel.Parent = storageBtn
+
+local storageCostLabel = Instance.new("TextLabel")
+storageCostLabel.Name = "StorageUpgradeCost"
+storageCostLabel.Size = UDim2.new(1,0,0,20)
+storageCostLabel.Position = UDim2.new(0,0,1,-20)
+storageCostLabel.BackgroundTransparency = 1
+storageCostLabel.Text = ""
+storageCostLabel.Font = Enum.Font.SourceSansBold
+storageCostLabel.TextColor3 = orangeColor
+storageCostLabel.TextStrokeColor3 = Color3.new(0,0,0)
+storageCostLabel.TextStrokeTransparency = 0
+storageCostLabel.TextScaled = true
+storageCostLabel.Parent = storageBtn
+
+storageBtn.MouseButton1Click:Connect(function()
+	ChangeStorageSize:FireServer()
+end)
+
+local function updateStorageButton()
+	local level = player:GetAttribute("StorageLevel") or 1
+	local cost = storageLevels[level] or storageLevels[#storageLevels]
+	storageLevelLabel.Text = "[Lvl " .. level .. "]"
+	storageCostLabel.Text = cost .. " Gold"
+	storageBtn.BackgroundColor3 = goldColor
+end
+updateStorageButton()
+player:GetAttributeChangedSignal("StorageLevel"):Connect(updateStorageButton)
+
+-- =========================================================================--
+-- 4) HELPER FUNCTIONS
+-- =========================================================================--
+
+-- update the on-screen entry timer each frame
+local function updateClientTimer()
+	if not entryTimerLabel.Visible then
+		if entryTimerConnection then
+			entryTimerConnection:Disconnect()
+			entryTimerConnection = nil
+		end
+		return
+	end
+
+	local elapsed = tick() - serverEntryStartTime
+	local left    = math.max(0, entryDuration - elapsed)
+	entryTimerLabel.Text = string.format("Entering Base: %.1fs", left)
+
+	if left <= 0 and entryTimerConnection then
+		entryTimerConnection:Disconnect()
+		entryTimerConnection = nil
+	end
+end
+
+local function stopClientTimer()
+	if entryTimerConnection then
+		entryTimerConnection:Disconnect()
+		entryTimerConnection = nil
+	end
+	entryTimerLabel.Visible = false
+end
+
+-- show/hide the base-creation prompt
+local function showPrompt()
+	if promptGui and promptGui.Parent then return end
+
+	promptGui = Instance.new("ScreenGui")
+	promptGui.Name         = "BaseCreationPromptGui"
+	promptGui.ResetOnSpawn = false
+	promptGui.DisplayOrder = 5
+	promptGui.Parent       = playerGui
+
+	local promptLabel = Instance.new("TextLabel")
+	promptLabel.Size              = UDim2.new(0.4,0,0.1,0)
+	promptLabel.Position          = UDim2.new(0.5,0,0.7,0)
+	promptLabel.AnchorPoint       = Vector2.new(0.5,0.5)
+	promptLabel.BackgroundColor3  = Color3.fromRGB(50,50,50)
+	promptLabel.BackgroundTransparency = 0.3
+	promptLabel.TextColor3        = Color3.fromRGB(255,255,255)
+	promptLabel.TextScaled        = true
+	promptLabel.Text              = "Press F to make your base"
+	promptLabel.Font              = Enum.Font.SourceSansBold
+	promptLabel.Parent            = promptGui
+end
+
+local function hidePrompt()
+	if promptGui then
+		promptGui:Destroy()
+		promptGui = nil
+	end
+end
+
+-- =========================================================================--
+-- 5) REMOTE EVENT CONNECTIONS
+-- =========================================================================--
+
+-- A) Open shop UI when server tells us
+OpenBaseShop.OnClientEvent:Connect(function()
+	updateStealUpgradeButton()
+	updateAutoMineButton()
+	updateEntryButton()
+	updateStorageButton()
+	shopGui.Enabled = true
+end)
+
+-- B) Update entry GUI & toggle shop prompt
+UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
+	if status == "StartTimer" then
+		entryDuration        = p1
+		serverEntryStartTime = p2
+		stopClientTimer()
+		entryTimerLabel.Text = string.format("Entering Base: %.1fs", entryDuration)
+		entryTimerLabel.Visible = true
+		baseStatusLabel.Visible = false
+		entryTimerConnection = RunService.RenderStepped:Connect(updateClientTimer)
+
+	elseif status == "EnteredBase" then
+		stopClientTimer()
+		entryTimerLabel.Visible  = false
+		baseStatusLabel.Text     = "You have entered your base"
+		baseStatusLabel.Visible  = true
+
+		-- enable owner-only shop prompt
+		for _, desc in ipairs(workspace:GetDescendants()) do
+			if desc:IsA("ProximityPrompt")
+				and desc.Name == "ShopPrompt"
+				and desc:GetAttribute("OwnerUserId") == player.UserId then
+				desc.Enabled = true
+			end
+		end
+
+	elseif status == "LeftBase" then
+		stopClientTimer()
+		entryTimerLabel.Visible = false
+		baseStatusLabel.Visible = false
+
+		-- disable it again when leaving
+		for _, desc in ipairs(workspace:GetDescendants()) do
+			if desc:IsA("ProximityPrompt")
+				and desc.Name == "ShopPrompt"
+				and desc:GetAttribute("OwnerUserId") == player.UserId then
+				desc.Enabled = false
+			end
+		end
+
+	elseif status == "CancelTimer" then
+		stopClientTimer()
+		entryTimerLabel.Visible = false
+		baseStatusLabel.Visible = false
+	end
+end)
+
+-- C) Show base-creation prompt
+DisplayBasePrompt.OnClientEvent:Connect(showPrompt)
+
+-- =========================================================================--
+-- 6) INPUT HANDLERS & CLEANUP
+-- =========================================================================--
+
+-- Press F to request base creation
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed then return end
+	if input.KeyCode == Enum.KeyCode.F then
+		if not baseCreationAttempted then
+			baseCreationAttempted = true
+			hidePrompt()
+			RequestBaseCreation:FireServer()
+		end
+	end
+end)
+
+-- Hide GUIs on character reset
+player.CharacterRemoving:Connect(function()
+	stopClientTimer()
+	entryTimerLabel.Visible = false
+	baseStatusLabel.Visible = false
+	shopGui.Enabled = false
+end)
+
+-- =========================================================================--
+-- 7) SHOP BUTTON CALLBACKS
+-- =========================================================================--
+
+
+
