@@ -506,7 +506,17 @@ UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 		end
 
 		if not _G._baseToolDisable then _G._baseToolDisable = {} end
-		local state = { tools = {}, conns = {}, class = player:GetAttribute("ClassName") }
+		-- capture currently equipped tool (if any) before unequip
+		local equippedBefore = nil
+		if player.Character then
+			for _, child in ipairs(player.Character:GetChildren()) do
+				if child:IsA("Tool") then
+					equippedBefore = child
+					break
+				end
+			end
+		end
+		local state = { tools = {}, conns = {}, class = player:GetAttribute("ClassName"), equipped = equippedBefore }
 		_G._baseToolDisable[player.UserId] = state
 
 		local function disableTool(tool)
@@ -560,6 +570,25 @@ UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 			for _, tool in ipairs(restore.tools) do
 				if tool and tool.Parent then
 					tool.Enabled = true
+				end
+			end
+			-- Re-equip a tool so player can fire immediately
+			local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				local toEquip = nil
+				if restore.equipped and restore.equipped.Parent and restore.equipped.Enabled then
+					toEquip = restore.equipped
+				else
+					-- fallback: first enabled tool in Backpack
+					for _, t in ipairs(player.Backpack:GetChildren()) do
+						if t:IsA("Tool") and t.Enabled then
+							toEquip = t
+							break
+						end
+					end
+				end
+				if toEquip then
+					humanoid:EquipTool(toEquip)
 				end
 			end
 			_G._baseToolDisable[player.UserId] = nil
