@@ -13,11 +13,16 @@ if not remotesFolder then
 end
 
 local FireAbility = remotesFolder:WaitForChild("FireAbility")
+local ClassConfig = require(ReplicatedStorage:WaitForChild("ClassConfig"))
 
--- Simple binding: Q -> Roll ability
+-- Simple binding: Q -> class-specific ability
 UserInputService.InputBegan:Connect(function(input, processed)
     if processed then return end
     if input.KeyCode == Enum.KeyCode.Q then
-        FireAbility:FireServer("Roll")
+        local className = player:GetAttribute("ClassName") or "Archer"
+        local tier = player:GetAttribute("ClassTier") or 0
+        local tierData = ClassConfig[className] and ClassConfig[className].Tiers[tier]
+        local abilityName = (tierData and tierData.Loadout and tierData.Loadout.Ability) or "Roll"
+        FireAbility:FireServer(abilityName)
     end
 end) 
