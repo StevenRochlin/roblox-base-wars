@@ -498,27 +498,36 @@ UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 		baseStatusLabel.Text     = "You have entered your base"
 		baseStatusLabel.Visible  = true
 
-		-- disable firing by removing tools from Backpack and Character
-		if not _G._baseStoredTools then _G._baseStoredTools = {} end
-		local storedInfo = { tools = {}, class = player:GetAttribute("ClassName") }
-		_G._baseStoredTools[player.UserId] = storedInfo
+		-- Disable the ability to fire weapons while inside base without destroying them
+		local char = player.Character
+		local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid:UnequipTools()
+		end
 
-		local function stashTool(tool)
+		if not _G._baseToolDisable then _G._baseToolDisable = {} end
+		local state = { tools = {}, conns = {}, class = player:GetAttribute("ClassName") }
+		_G._baseToolDisable[player.UserId] = state
+
+		local function disableTool(tool)
 			if tool:IsA("Tool") then
-				local clone = tool:Clone()
-				table.insert(storedInfo.tools, clone)
-				tool:Destroy() -- remove existing instance to avoid duplicate connections
+				if tool.Enabled then
+					table.insert(state.tools, tool)
+				end
+				tool.Enabled = false
 			end
 		end
 
-		for _, tool in ipairs(player.Backpack:GetChildren()) do
-			stashTool(tool)
-		end
-
+		-- Disable existing tools
+		for _, t in ipairs(player.Backpack:GetChildren()) do disableTool(t) end
 		if player.Character then
-			for _, tool in ipairs(player.Character:GetChildren()) do
-				stashTool(tool)
-			end
+			for _, t in ipairs(player.Character:GetChildren()) do disableTool(t) end
+		end
+
+		-- Listen for new tools granted while inside base (e.g., class switch)
+		state.conns.backpack = player.Backpack.ChildAdded:Connect(disableTool)
+		if player.Character then
+			state.conns.char = player.Character.ChildAdded:Connect(disableTool)
 		end
 
 		-- enable owner-only shop prompt
@@ -535,19 +544,25 @@ UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 		entryTimerLabel.Visible = false
 		baseStatusLabel.Visible = false
 
-		-- restore tools when leaving base (clear duplicates first)
-		local storedInfo = _G._baseStoredTools and _G._baseStoredTools[player.UserId]
-		if storedInfo then
-			-- restore only if they haven’t switched classes while inside the base
-			if storedInfo.class == player:GetAttribute("ClassName") then
-				for _, clone in ipairs(storedInfo.tools) do
-					if clone and not clone.Parent then
-						clone.Parent = player.Backpack
-					end
+		-- Re-enable tools and clean up
+		local char = player.Character
+		local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid:UnequipTools()
+		end
+
+		local restore = _G._baseToolDisable and _G._baseToolDisable[player.UserId]
+		if restore then
+			-- Disconnect listeners
+			for _, c in pairs(restore.conns) do if c.Connected then c:Disconnect() end end
+
+			-- Re-enable any stored tools that still exist
+			for _, tool in ipairs(restore.tools) do
+				if tool and tool.Parent then
+					tool.Enabled = true
 				end
 			end
-			-- cleanup regardless
-			_G._baseStoredTools[player.UserId] = nil
+			_G._baseToolDisable[player.UserId] = nil
 		end
 
 		-- disable it again when leaving
