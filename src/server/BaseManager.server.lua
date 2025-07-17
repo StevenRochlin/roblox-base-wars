@@ -327,7 +327,7 @@ RequestBaseCreation.OnServerEvent:Connect(function(player)
 				local stillInside = false
 				if hrp then
 					local dist = (hrp.Position - basePart.Position).Magnitude
-					stillInside = dist <= (basePart.Size.X/2 + 3)
+					stillInside = dist <= (basePart.Size.X/2 + 1)
 				end
 
 				if not stillInside then
@@ -375,16 +375,18 @@ RunService.Heartbeat:Connect(function()
 			end
 		end
 
-		-- Case 2: Player has already entered the base but may have walked out
+		-- Additional safeguard: if player has already entered the base but moves away and
+		-- TouchEnded failed to fire, force a clean leave.
 		if state.isInDefinitiveBaseState then
-			local player   = Players:GetPlayerByUserId(userId)
-			local character= player and (state.character or player.Character)
+			local player = Players:GetPlayerByUserId(userId)
+			local character = player and (state.character or player.Character)
 			local baseData = playerBasesData[userId]
 			local basePart = baseData and baseData.basePart
 			if player and character and basePart and character:FindFirstChild("HumanoidRootPart") then
 				local dist = (character.HumanoidRootPart.Position - basePart.Position).Magnitude
-				local radius = (basePart.Size.X/2 + 1) -- tightened buffer (was +2)
-				if dist > radius then
+				local radiusOut = (basePart.Size.X/2 + 1)
+				if dist > radiusOut then
+					state.isTouchingBase = false -- ensure consistent state
 					leaveBase(player)
 				end
 			end
