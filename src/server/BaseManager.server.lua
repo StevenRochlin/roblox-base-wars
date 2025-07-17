@@ -318,12 +318,26 @@ RequestBaseCreation.OnServerEvent:Connect(function(player)
 			local toucher = Players:GetPlayerFromCharacter(hit.Parent)
 			if toucher and toucher.UserId == userId then
 				local state = playerBaseStates[userId]
-				if state.isTouchingBase and not state.isInDefinitiveBaseState then
-					UpdateBaseEntryGUI:FireClient(toucher, "CancelTimer")
+
+				-- Only treat this as leaving the base if the player is actually outside the
+				-- base radius. Touch events can briefly disconnect when equipping/unequipping
+				-- tools, which used to reset the entry timer unnecessarily.
+				local char = toucher.Character
+				local hrp = char and char:FindFirstChild("HumanoidRootPart")
+				local stillInside = false
+				if hrp then
+					local dist = (hrp.Position - basePart.Position).Magnitude
+					stillInside = dist <= (basePart.Size.X/2 + 3)
 				end
-				state.isTouchingBase = false
-				if state.isInDefinitiveBaseState then
-					leaveBase(toucher)
+
+				if not stillInside then
+					if state.isTouchingBase and not state.isInDefinitiveBaseState then
+						UpdateBaseEntryGUI:FireClient(toucher, "CancelTimer")
+					end
+					state.isTouchingBase = false
+					if state.isInDefinitiveBaseState then
+						leaveBase(toucher)
+					end
 				end
 			end
 		end

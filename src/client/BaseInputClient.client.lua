@@ -498,6 +498,27 @@ UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 		baseStatusLabel.Text     = "You have entered your base"
 		baseStatusLabel.Visible  = true
 
+		-- disable firing by removing tools from Backpack and Character
+		if not _G._baseStoredTools then _G._baseStoredTools = {} end
+		local storedTools = {}
+		_G._baseStoredTools[player.UserId] = storedTools
+		-- store and remove from Backpack
+		for _, tool in ipairs(player.Backpack:GetChildren()) do
+			if tool:IsA("Tool") then
+				table.insert(storedTools, tool)
+				tool.Parent = nil
+			end
+		end
+		-- store and remove any equipped tools from Character
+		if player.Character then
+			for _, tool in ipairs(player.Character:GetChildren()) do
+				if tool:IsA("Tool") then
+					table.insert(storedTools, tool)
+					tool.Parent = nil
+				end
+			end
+		end
+
 		-- enable owner-only shop prompt
 		for _, desc in ipairs(workspace:GetDescendants()) do
 			if desc:IsA("ProximityPrompt")
@@ -511,6 +532,23 @@ UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 		stopClientTimer()
 		entryTimerLabel.Visible = false
 		baseStatusLabel.Visible = false
+
+		-- restore tools when leaving base (clear duplicates first)
+		if _G._baseStoredTools and _G._baseStoredTools[player.UserId] then
+			-- destroy any remaining tools in Backpack
+			for _, existing in ipairs(player.Backpack:GetChildren()) do
+				if existing:IsA("Tool") then
+					existing:Destroy()
+				end
+			end
+			-- reparent stored tools to Backpack
+			for _, tool in ipairs(_G._baseStoredTools[player.UserId]) do
+				if tool and not tool.Parent then
+					tool.Parent = player.Backpack
+				end
+			end
+			_G._baseStoredTools[player.UserId] = nil
+		end
 
 		-- disable it again when leaving
 		for _, desc in ipairs(workspace:GetDescendants()) do
