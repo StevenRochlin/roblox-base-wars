@@ -608,8 +608,21 @@ Players.PlayerAdded:Connect(function(player)
 		if data and data.basePart then
 			local hrp = char:FindFirstChild("HumanoidRootPart")
 			if hrp then
-				local spawnPos = data.basePart.Position + Vector3.new(0, (data.basePart.Size.Y/2) + 3, 0)
-				hrp.CFrame = CFrame.new(spawnPos)
+				-- spawn roughly at the centre of the base (inside the sphere)
+				local hrp = char:FindFirstChild("HumanoidRootPart")
+				if hrp then
+					hrp.CFrame = CFrame.new(data.basePart.Position)
+				end
+
+				-- ensure player is marked as inside base
+				local state = playerBaseStates[player.UserId]
+				if state then
+					state.isTouchingBase = true
+					state.touchStartTime = tick()
+					state.character = char
+				end
+				-- directly enter base (invincibility etc.)
+				enterBase(player, char)
 			end
 		end
 	end)
