@@ -500,22 +500,24 @@ UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 
 		-- disable firing by removing tools from Backpack and Character
 		if not _G._baseStoredTools then _G._baseStoredTools = {} end
-		local storedTools = {}
-		_G._baseStoredTools[player.UserId] = storedTools
-		-- store and remove from Backpack
-		for _, tool in ipairs(player.Backpack:GetChildren()) do
+		local storedInfo = { tools = {}, class = player:GetAttribute("ClassName") }
+		_G._baseStoredTools[player.UserId] = storedInfo
+
+		local function stashTool(tool)
 			if tool:IsA("Tool") then
-				table.insert(storedTools, tool)
-				tool.Parent = nil
+				local clone = tool:Clone()
+				table.insert(storedInfo.tools, clone)
+				tool:Destroy() -- remove existing instance to avoid duplicate connections
 			end
 		end
-		-- store and remove any equipped tools from Character
+
+		for _, tool in ipairs(player.Backpack:GetChildren()) do
+			stashTool(tool)
+		end
+
 		if player.Character then
 			for _, tool in ipairs(player.Character:GetChildren()) do
-				if tool:IsA("Tool") then
-					table.insert(storedTools, tool)
-					tool.Parent = nil
-				end
+				stashTool(tool)
 			end
 		end
 
@@ -534,19 +536,17 @@ UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 		baseStatusLabel.Visible = false
 
 		-- restore tools when leaving base (clear duplicates first)
-		if _G._baseStoredTools and _G._baseStoredTools[player.UserId] then
-			-- destroy any remaining tools in Backpack
-			for _, existing in ipairs(player.Backpack:GetChildren()) do
-				if existing:IsA("Tool") then
-					existing:Destroy()
+		local storedInfo = _G._baseStoredTools and _G._baseStoredTools[player.UserId]
+		if storedInfo then
+			-- restore only if they haven’t switched classes while inside the base
+			if storedInfo.class == player:GetAttribute("ClassName") then
+				for _, clone in ipairs(storedInfo.tools) do
+					if clone and not clone.Parent then
+						clone.Parent = player.Backpack
+					end
 				end
 			end
-			-- reparent stored tools to Backpack
-			for _, tool in ipairs(_G._baseStoredTools[player.UserId]) do
-				if tool and not tool.Parent then
-					tool.Parent = player.Backpack
-				end
-			end
+			-- cleanup regardless
 			_G._baseStoredTools[player.UserId] = nil
 		end
 
@@ -637,6 +637,7 @@ do
 
     UserInputService.JumpRequest:Connect(onJumpRequest)
 end
+
 
 
 

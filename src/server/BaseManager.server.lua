@@ -349,6 +349,7 @@ end)
 -- RunService loop to complete base entry
 RunService.Heartbeat:Connect(function()
 	for userId, state in pairs(playerBaseStates) do
+		-- Case 1: Player is in the process of entering (timer running)
 		if state.isTouchingBase and not state.isInDefinitiveBaseState then
 			local player   = Players:GetPlayerByUserId(userId)
 			local character= state.character or (player and player.Character)
@@ -371,6 +372,21 @@ RunService.Heartbeat:Connect(function()
 			else
 				if player then UpdateBaseEntryGUI:FireClient(player, "CancelTimer") end
 				state.isTouchingBase = false
+			end
+		end
+
+		-- Case 2: Player has already entered the base but may have walked out
+		if state.isInDefinitiveBaseState then
+			local player   = Players:GetPlayerByUserId(userId)
+			local character= player and (state.character or player.Character)
+			local baseData = playerBasesData[userId]
+			local basePart = baseData and baseData.basePart
+			if player and character and basePart and character:FindFirstChild("HumanoidRootPart") then
+				local dist = (character.HumanoidRootPart.Position - basePart.Position).Magnitude
+				local radius = (basePart.Size.X/2 + 1) -- tightened buffer (was +2)
+				if dist > radius then
+					leaveBase(player)
+				end
 			end
 		end
 	end

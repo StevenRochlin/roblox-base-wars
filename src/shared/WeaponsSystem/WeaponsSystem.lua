@@ -474,6 +474,10 @@ function WeaponsSystem.doDamage(target, amount, damageType, dealer, hitInfo, dam
 	if not target or ancestorHasTag(target, "WeaponsSystemIgnore") then
 		return
 	end
+	-- Block damage FROM players who are inside their own base (they cannot attack while safe)
+	if dealer and dealer:IsA("Player") and dealer:GetAttribute("CanDealDamage") == false then
+		return
+	end
 	-- Block damage to players who are inside their base (invulnerable)
 	local targetPlayer = Players:GetPlayerFromCharacter(target.Parent)
 	if targetPlayer and targetPlayer:GetAttribute("CanDealDamage") == false then
