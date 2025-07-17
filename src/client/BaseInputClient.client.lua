@@ -24,6 +24,9 @@ local ChangeStealSpeed    = ReplicatedStorage:WaitForChild("ChangeStealSpeed")
 local ChangeMineSpeed     = ReplicatedStorage:WaitForChild("ChangeMineSpeed")
 local ChangeEntryTime     = ReplicatedStorage:WaitForChild("ChangeEntryTime")
 local ChangeStorageSize   = ReplicatedStorage:WaitForChild("ChangeStorageSize")
+-- Class equip remote
+local classRemotes         = ReplicatedStorage:WaitForChild("ClassRemotes")
+local RequestClassEquip   = classRemotes:WaitForChild("RequestClassEquip")
 
 -- upgrade configuration
 local stealBaseIncrement = 10
@@ -104,8 +107,8 @@ shopGui.Enabled      = false
 shopGui.Parent       = playerGui
 
 local shopFrame = Instance.new("Frame")
-shopFrame.Size               = UDim2.new(0,300,0,200)
-shopFrame.Position           = UDim2.new(0.5,-150,0.5,-100)
+shopFrame.Size               = UDim2.new(0,300,0,260)
+shopFrame.Position           = UDim2.new(0.5,-150,0.5,-130)
 shopFrame.BackgroundColor3   = Color3.fromRGB(30,30,30)
 shopFrame.BackgroundTransparency = 0.3
 shopFrame.Parent             = shopGui
@@ -135,6 +138,29 @@ title.Text                 = "Base Shop"
 title.Font                 = Enum.Font.SourceSansBold
 title.TextScaled           = true
 title.Parent               = shopFrame
+
+-- Class selection buttons (insert above upgrades)
+local archerBtn = Instance.new("TextButton")
+archerBtn.Name = "ArcherButton"
+archerBtn.Size = UDim2.new(0, 120, 0, 60)
+archerBtn.Position = UDim2.new(0, 10, 0, 190)
+archerBtn.Text = "Archer"
+archerBtn.TextScaled = true
+archerBtn.Parent = shopFrame
+archerBtn.MouseButton1Click:Connect(function()
+    RequestClassEquip:FireServer("Archer", 0)
+end)
+
+local ninjaBtn = Instance.new("TextButton")
+ninjaBtn.Name = "NinjaButton"
+ninjaBtn.Size = UDim2.new(0, 120, 0, 60)
+ninjaBtn.Position = UDim2.new(0, 140, 0, 190)
+ninjaBtn.Text = "Ninja"
+ninjaBtn.TextScaled = true
+ninjaBtn.Parent = shopFrame
+ninjaBtn.MouseButton1Click:Connect(function()
+    RequestClassEquip:FireServer("Ninja", 0)
+end)
 
 local fastStealBtn = Instance.new("TextButton")
 fastStealBtn.Size = UDim2.new(0,120,0,60)
