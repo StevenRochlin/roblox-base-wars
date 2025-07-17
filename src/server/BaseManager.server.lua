@@ -385,6 +385,17 @@ ChangeStealAmount.OnServerEvent:Connect(function(player, amountToAdd)
 	data.storedGold = data.storedGold - cost
 	updateBillboard(userId)
 
+	-- Auto-deposit extra carried gold up to base capacity
+	local goldStat = stats:FindFirstChild("Gold")
+	local spaceLeft = data.maxStorage - data.storedGold
+	if goldStat and spaceLeft > 0 then
+		local deposit = math.min(goldStat.Value, spaceLeft)
+		data.storedGold = data.storedGold + deposit
+		baseGold.Value = data.storedGold
+		goldStat.Value = goldStat.Value - deposit
+		updateBillboard(userId)
+	end
+
 	-- Increase steal amount
 	local newAmt = currentAmt + baseIncrement
 	playerStealAmounts[userId] = newAmt
@@ -411,6 +422,17 @@ ChangeMineSpeed.OnServerEvent:Connect(function(player, amountToAdd)
 	data.storedGold = data.storedGold - cost
 	updateBillboard(userId)
 
+	-- Auto-deposit extra carried gold up to base capacity
+	local goldStat = stats:FindFirstChild("Gold")
+	local spaceLeft = data.maxStorage - data.storedGold
+	if goldStat and spaceLeft > 0 then
+		local deposit = math.min(goldStat.Value, spaceLeft)
+		data.storedGold = data.storedGold + deposit
+		baseGold.Value = data.storedGold
+		goldStat.Value = goldStat.Value - deposit
+		updateBillboard(userId)
+	end
+
 	-- Increase mine speed
 	playerMineSpeeds[userId] = nextLevel
 
@@ -435,6 +457,17 @@ ChangeEntryTime.OnServerEvent:Connect(function(player)
 	baseGold.Value = baseGold.Value - cost
 	data.storedGold = data.storedGold - cost
 	updateBillboard(userId)
+
+	-- Auto-deposit extra carried gold up to base capacity
+	local goldStat = stats:FindFirstChild("Gold")
+	local spaceLeft = data.maxStorage - data.storedGold
+	if goldStat and spaceLeft > 0 then
+		local deposit = math.min(goldStat.Value, spaceLeft)
+		data.storedGold = data.storedGold + deposit
+		baseGold.Value = data.storedGold
+		goldStat.Value = goldStat.Value - deposit
+		updateBillboard(userId)
+	end
 
 	-- Upgrade entry level
 	playerEntryLevels[userId] = nextLevel
