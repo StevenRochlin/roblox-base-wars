@@ -174,6 +174,9 @@ RequestBaseCreation.OnServerEvent:Connect(function(player)
 	playerBaseStates[userId] = { isTouchingBase = false, touchStartTime = 0,
 		isInDefinitiveBaseState = false, character = nil, originalTransparency = {} }
 
+	-- mark that player now has a base
+	player:SetAttribute("HasBase", true)
+
 	local char = player.Character
 	local hrp  = char and char:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end

@@ -48,13 +48,17 @@ local function onPlayerAdded(player)
 	-- Immediately show the prompt on join
 	task.defer(function()
 		task.wait(0.2)
-		DisplayBasePrompt:FireClient(player)
+		if not player:GetAttribute("HasBase") then
+			DisplayBasePrompt:FireClient(player)
+		end
 	end)
 
 	-- Also show it on every respawn
 	player.CharacterAdded:Connect(function()
 		task.wait(0.2)
-		DisplayBasePrompt:FireClient(player)
+		if not player:GetAttribute("HasBase") then
+			DisplayBasePrompt:FireClient(player)
+		end
 	end)
 
 
