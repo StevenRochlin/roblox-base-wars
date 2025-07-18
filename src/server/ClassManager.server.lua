@@ -111,8 +111,14 @@ local function equipClass(player, className, tier)
 
     -- give new tool(s)
     local loadout = tierData.Loadout
-    if loadout and loadout.Tool then
-        giveTool(player, loadout.Tool)
+    if loadout then
+        if loadout.Tool then
+            giveTool(player, loadout.Tool)
+        elseif loadout.Tools then
+            for _, toolName in ipairs(loadout.Tools) do
+                giveTool(player, toolName)
+            end
+        end
     end
 
     -- apply avatar/skin

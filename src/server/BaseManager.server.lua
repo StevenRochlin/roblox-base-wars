@@ -300,6 +300,11 @@ RequestBaseCreation.OnServerEvent:Connect(function(player)
 
 		local sid     = stealer.UserId
 		local stealV  = playerStealAmounts[sid] or 10
+		-- Pirate passive bonus
+		if stealer:GetAttribute("ClassName") == "Pirate" then
+			stealV = math.floor(stealV * 1.5)
+		end
+
 		local amount  = math.min(data.storedGold, stealV)
 		data.storedGold = data.storedGold - amount
 

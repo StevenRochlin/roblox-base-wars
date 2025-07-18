@@ -30,4 +30,17 @@ return {
         },
         -- Additional UI data can be added later
     },
+    Pirate = {
+        DisplayName = "Pirate",
+        Tiers = {
+            [0] = {
+                Cost = 0,
+                MaxHealth = 100,
+                Loadout = {
+                    Tools = {"Flintlock", "Saber"},
+                    Ability = "Roll"
+                },
+            },
+        },
+    },
 } 
