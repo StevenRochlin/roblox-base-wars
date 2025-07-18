@@ -117,6 +117,19 @@ local function onPlayerAdded(player)
                     end)
                 end
             end
+            -- Award kill bounty to killer
+            local creatorTag = humanoid:FindFirstChild("creator")
+            if creatorTag and creatorTag.Value and creatorTag.Value:IsA("Player") then
+                local killer = creatorTag.Value
+                if killer ~= player then
+                    local bountyReward = killer:GetAttribute("KillBountyReward") or 15
+                    local killerStats = killer:FindFirstChild("leaderstats")
+                    local killerGold = killerStats and killerStats:FindFirstChild("Gold")
+                    if killerGold then
+                        killerGold.Value = killerGold.Value + bountyReward
+                    end
+                end
+            end
         end)
     end)
 end

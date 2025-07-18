@@ -26,6 +26,7 @@ local ChangeStealSpeed    = ReplicatedStorage:WaitForChild("ChangeStealSpeed")
 local ChangeMineSpeed     = ReplicatedStorage:WaitForChild("ChangeMineSpeed")
 local ChangeEntryTime     = ReplicatedStorage:WaitForChild("ChangeEntryTime")
 local ChangeStorageSize   = ReplicatedStorage:WaitForChild("ChangeStorageSize")
+local ChangeKillBounty    = ReplicatedStorage:WaitForChild("ChangeKillBounty")
 -- Class equip remote
 local classRemotes         = ReplicatedStorage:WaitForChild("ClassRemotes")
 local RequestClassEquip   = classRemotes:WaitForChild("RequestClassEquip")
@@ -49,6 +50,9 @@ local storageColors       = {
 	[4] = Color3.fromRGB(128,0,128),
 }
 local goldColor           = Color3.fromRGB(255, 215, 0)
+local redColor            = Color3.fromRGB(255,0,0)
+local killBountyRewards   = {15,30,60,90,120,150,180}
+local killBountyCosts     = {0,60,120,240,480,960,1920} -- index matches level
 
 -- =========================================================================--
 -- 2) STATE VARIABLES
@@ -407,6 +411,69 @@ local function updateStorageButton()
 end
 updateStorageButton()
 player:GetAttributeChangedSignal("StorageLevel"):Connect(updateStorageButton)
+
+-- Kill bounty upgrade button
+local bountyBtn = Instance.new("TextButton")
+bountyBtn.Size = UDim2.new(0,120,0,60)
+bountyBtn.Position = UDim2.new(0,10,0,260)
+bountyBtn.BackgroundColor3 = redColor
+bountyBtn.BorderSizePixel = 0
+bountyBtn.Parent = shopFrame
+
+local bountyTitle = Instance.new("TextLabel")
+bountyTitle.Name = "BountyTitle"
+bountyTitle.Size = UDim2.new(1,0,0,20)
+bountyTitle.Position = UDim2.new(0,0,0,0)
+bountyTitle.BackgroundTransparency = 1
+bountyTitle.Text = "Kill Bounty"
+bountyTitle.Font = Enum.Font.SourceSansBold
+bountyTitle.TextColor3 = redColor
+bountyTitle.TextStrokeColor3 = Color3.new(0,0,0)
+bountyTitle.TextStrokeTransparency = 0
+bountyTitle.TextScaled = true
+bountyTitle.Parent = bountyBtn
+
+local bountyLevelLabel = Instance.new("TextLabel")
+bountyLevelLabel.Name = "BountyLevel"
+bountyLevelLabel.Size = UDim2.new(1,0,0,20)
+bountyLevelLabel.Position = UDim2.new(0,0,0,20)
+bountyLevelLabel.BackgroundTransparency = 1
+bountyLevelLabel.Text = "[Lvl 0]"
+bountyLevelLabel.Font = Enum.Font.SourceSansBold
+bountyLevelLabel.TextColor3 = Color3.new(1,1,1)
+bountyLevelLabel.TextStrokeColor3 = Color3.new(0,0,0)
+bountyLevelLabel.TextStrokeTransparency = 0
+bountyLevelLabel.TextScaled = true
+bountyLevelLabel.Parent = bountyBtn
+
+local bountyCostLabel = Instance.new("TextLabel")
+bountyCostLabel.Name = "BountyCost"
+bountyCostLabel.Size = UDim2.new(1,0,0,20)
+bountyCostLabel.Position = UDim2.new(0,0,1,-20)
+bountyCostLabel.BackgroundTransparency = 1
+bountyCostLabel.Text = ""
+bountyCostLabel.Font = Enum.Font.SourceSansBold
+bountyCostLabel.TextColor3 = orangeColor
+bountyCostLabel.TextStrokeColor3 = Color3.new(0,0,0)
+bountyCostLabel.TextStrokeTransparency = 0
+bountyCostLabel.TextScaled = true
+bountyCostLabel.Parent = bountyBtn
+
+bountyBtn.MouseButton1Click:Connect(function()
+	ChangeKillBounty:FireServer()
+end)
+
+local function updateBountyButton()
+	local reward = player:GetAttribute("KillBountyReward") or 15
+	local level = 0
+	for idx, val in ipairs(killBountyRewards) do
+		if val == reward then level = idx-1 break end
+	end
+	bountyLevelLabel.Text = "[Lvl "..level.."]"
+	bountyCostLabel.Text = (killBountyCosts[level+2] or "Max") .. " Gold"
+end
+updateBountyButton()
+player:GetAttributeChangedSignal("KillBountyReward"):Connect(updateBountyButton)
 
 -- =========================================================================--
 -- 4) HELPER FUNCTIONS

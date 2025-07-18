@@ -21,6 +21,9 @@ local ChangeStealAmount         = ReplicatedStorage:WaitForChild("ChangeStealSpe
 local ChangeMineSpeed           = ReplicatedStorage:WaitForChild("ChangeMineSpeed")   -- uses ChangeMineSpeed remote event
 local ChangeEntryTime           = ReplicatedStorage:WaitForChild("ChangeEntryTime")   -- uses ChangeEntryTime remote event
 local ChangeStorageSize         = ReplicatedStorage:WaitForChild("ChangeStorageSize") -- uses ChangeStorageSize remote event
+local ChangeKillBounty          = ReplicatedStorage:FindFirstChild("ChangeKillBounty") or Instance.new("RemoteEvent")
+ChangeKillBounty.Name = "ChangeKillBounty"
+ChangeKillBounty.Parent = ReplicatedStorage
 
 -- Constants and state
 local BASE_FOLDER_NAME          = "PlayerBases"
@@ -55,6 +58,11 @@ local playerStorageLevels = {}
 -- [ userId ] = current entry time upgrade level
 local playerEntryLevels = {}
 
+-- [ userId ] = current kill bounty level (0 default)
+local playerKillBountyLevels = {}
+
+local killBountyRewards = {30, 60, 90, 120, 150, 180}
+local killBountyCosts   = {60, 120, 240, 480, 960, 1920}
 
 -- Update the on-base billboard
 local function updateBillboard(userId)
@@ -395,6 +403,8 @@ RequestBaseCreation.OnServerEvent:Connect(function(player)
 	print("[BaseManager] Base created for " .. player.Name)
 	-- mark that player now has a base (successful)
 	player:SetAttribute("HasBase", true)
+	playerKillBountyLevels[userId] = 0
+	player:SetAttribute("KillBountyReward", 15)
 end)
 
 -- RunService loop to complete base entry
@@ -599,6 +609,28 @@ ChangeStorageSize.OnServerEvent:Connect(function(player)
 			updateBillboard(userId)
 		end
 	end
+end)
+
+-- Handle kill bounty upgrade with cost
+ChangeKillBounty.OnServerEvent:Connect(function(player)
+	local userId = player.UserId
+	local data   = playerBasesData[userId]
+	local stats  = player:FindFirstChild("leaderstats")
+	local baseGold = stats and stats:FindFirstChild("BaseGold")
+	if not data or not baseGold then return end
+
+	local currentLevel = playerKillBountyLevels[userId] or 0
+	local nextLevel = currentLevel + 1
+	if nextLevel > #killBountyRewards then return end
+	local cost = killBountyCosts[nextLevel]
+	if baseGold.Value < cost then return end
+
+	baseGold.Value = baseGold.Value - cost
+	data.storedGold = data.storedGold - cost
+	updateBillboard(userId)
+
+	playerKillBountyLevels[userId] = nextLevel
+	player:SetAttribute("KillBountyReward", killBountyRewards[nextLevel])
 end)
 
 -- Passive auto-mining loop
