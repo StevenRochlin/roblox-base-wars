@@ -108,7 +108,12 @@ local function swapCharacterModel(player, className)
 	player:SetAttribute("IsClassSwapping", true)
 	player.Character = newChar
 	newChar.Parent = workspace
-	newChar:SetPrimaryPartCFrame(spawnCFrame)
+	-- Preserve yaw but reset roll/pitch to keep character upright
+	local pos = spawnCFrame.Position
+	local look = Vector3.new(spawnCFrame.LookVector.X, 0, spawnCFrame.LookVector.Z)
+	if look.Magnitude < 1e-4 then look = Vector3.new(0,0,-1) end
+	local uprightCFrame = CFrame.lookAt(pos, pos + look)
+	newChar:SetPrimaryPartCFrame(uprightCFrame)
 
 	-- Copy essential scripts/objects if the template is missing them
 	if oldChar:FindFirstChild("Animate") and not newChar:FindFirstChild("Animate") then
