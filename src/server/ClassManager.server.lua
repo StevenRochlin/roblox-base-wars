@@ -38,6 +38,9 @@ local ClassItemsFolder  = ReplicatedStorage:WaitForChild("ClassItems")
 -- Folder that contains HumanoidDescription objects named after classes
 local ClassAvatarsFolder = ReplicatedStorage:FindFirstChild("ClassAvatars")
 
+-- NEW: Folder that contains full character models named after classes
+local ClassCharactersFolder = ReplicatedStorage:FindFirstChild("ClassCharacters") or ReplicatedStorage:FindFirstChild("Characters")
+
 -- /////////////////////////////////////////////////////////////////
 -- Helper: apply avatar
 -- /////////////////////////////////////////////////////////////////
@@ -54,6 +57,82 @@ local function applyAvatar(player, className)
 			humanoid:ApplyDescription(desc)
 		end)
 	end
+end
+
+-- /////////////////////////////////////////////////////////////////
+-- Helper: ensure Animate script exists on character
+-- /////////////////////////////////////////////////////////////////
+local function ensureAnimateScript(char)
+	if char:FindFirstChild("Animate") then
+		return
+	end
+
+	-- Try to clone from StarterPlayer
+	local starterAnimate = game:GetService("StarterPlayer").StarterCharacterScripts:FindFirstChild("Animate")
+	if starterAnimate then
+		starterAnimate:Clone().Parent = char
+	end
+end
+
+-- /////////////////////////////////////////////////////////////////
+-- Helper: swap full character model (if provided)
+-- /////////////////////////////////////////////////////////////////
+local function swapCharacterModel(player, className)
+	if not ClassCharactersFolder then
+		return false -- no folder present
+	end
+
+	local template = ClassCharactersFolder:FindFirstChild(className)
+	if not template then
+		return false -- no matching model
+	end
+
+	local oldChar = player.Character
+	if not oldChar or not oldChar.PrimaryPart then
+		return false -- cannot determine spawn CFrame
+	end
+
+	local spawnCFrame = oldChar.PrimaryPart.CFrame
+
+	local newChar = template:Clone()
+	-- Ensure we have a primary part before assigning
+	if newChar:FindFirstChild("HumanoidRootPart") then
+		newChar.PrimaryPart = newChar.HumanoidRootPart
+	elseif newChar.PrimaryPart == nil then
+		warn("[ClassManager] Character model for " .. className .. " is missing HumanoidRootPart / PrimaryPart")
+		return false
+	end
+
+	newChar.Name = player.Name
+    -- Assign character BEFORE parenting to mimic original behaviour
+	player:SetAttribute("IsClassSwapping", true)
+	player.Character = newChar
+	newChar.Parent = workspace
+	newChar:SetPrimaryPartCFrame(spawnCFrame)
+
+	-- Copy essential scripts/objects if the template is missing them
+	if oldChar:FindFirstChild("Animate") and not newChar:FindFirstChild("Animate") then
+		oldChar.Animate:Clone().Parent = newChar
+	end
+	if oldChar:FindFirstChild("Health") and not newChar:FindFirstChild("Health") then
+		oldChar.Health:Clone().Parent = newChar
+	end
+	-- Fallback ensure animate exists
+	ensureAnimateScript(newChar)
+
+	-- Tell CharacterAdded listeners this is an intentional swap
+	player:SetAttribute("IsClassSwapping", true)
+	player.Character = newChar
+	-- DO NOT clear here; CharacterAdded handler will clear after initialization
+
+	-- Make sure nothing stays anchored
+	for _, inst in ipairs(newChar:GetDescendants()) do
+		if inst:IsA("BasePart") then
+			inst.Anchored = false
+		end
+	end
+
+	return true
 end
 
 -- /////////////////////////////////////////////////////////////////
@@ -94,6 +173,14 @@ local function equipClass(player, className, tier)
         return
     end
 
+    -- Attempt to swap full character model first. If unavailable, fallback to avatar description.
+    local swapped = swapCharacterModel(player, className)
+    if not swapped then
+        -- apply avatar via HumanoidDescription when no dedicated model
+        applyAvatar(player, className)
+    end
+
+    -- Ensure we operate on the (possibly) new character
     local char = player.Character or player.CharacterAdded:Wait()
     local humanoid = char:FindFirstChildOfClass("Humanoid")
     if humanoid then
@@ -121,9 +208,6 @@ local function equipClass(player, className, tier)
         end
     end
 
-    -- apply avatar/skin
-    applyAvatar(player, className)
-
     -- Tag player attributes
     player:SetAttribute("ClassName", className)
     player:SetAttribute("ClassTier", tier)
@@ -135,7 +219,15 @@ end
 local function onPlayerAdded(player)
     -- auto-equip Archer tier 0 for now
     player.CharacterAdded:Connect(function()
-        equipClass(player, "Archer", 0)
+        if player:GetAttribute("IsClassSwapping") then
+            -- internal model swap; clear flag and skip auto-equip
+            player:SetAttribute("IsClassSwapping", false)
+            return
+        end
+
+        local savedClass = player:GetAttribute("ClassName") or "Archer"
+        local savedTier  = player:GetAttribute("ClassTier") or 0
+        equipClass(player, savedClass, savedTier)
     end)
 
     if player.Character then
