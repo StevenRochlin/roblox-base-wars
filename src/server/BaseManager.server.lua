@@ -284,7 +284,11 @@ RequestBaseCreation.OnServerEvent:Connect(function(player)
 		local sid = stealer.UserId
 		if sid == userId then return end
 		local data = playerBasesData[userId]
-		if not data or data.storedGold <= 0 then return end
+		if not data then return end
+		if data.storedGold <= 0 then
+			BasePlacementError:FireClient(stealer, "NoGold")
+			return
+		end
 
 		local sid     = stealer.UserId
 		local stealV  = playerStealAmounts[sid] or 10

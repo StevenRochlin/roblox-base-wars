@@ -505,7 +505,7 @@ end)
 -- =========================================================================--
 
 -- Error prompt for invalid placement
-local function showError()
+local function showError(msg)
 	local errGui = Instance.new("ScreenGui")
 	errGui.Name = "BaseErrorGui"
 	errGui.ResetOnSpawn = false
@@ -520,7 +520,7 @@ local function showError()
 	lbl.BackgroundTransparency = 1
 	lbl.TextScaled = true
 	lbl.Font = Enum.Font.SourceSansBold
-	lbl.Text = "This Spot is Too Close to an Enemy Base"
+	lbl.Text = msg or "Error"
 	lbl.Parent = errGui
 
 	-- auto-destroy after 2 seconds
@@ -535,7 +535,9 @@ end
 
 BasePlacementError.OnClientEvent:Connect(function(reason)
 	if reason == "TooClose" then
-		showError()
+		showError("This Spot is Too Close to an Enemy Base")
+	elseif reason == "NoGold" then
+		showError("Base has no gold")
 	end
 end)
 
