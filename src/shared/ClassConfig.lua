@@ -22,6 +22,12 @@ return {
             [0] = {
                 Cost = 0,               -- free for now
                 MaxHealth = 100,
+                -- Override humanoid defaults when this class is equipped
+                HumanoidProperties = {
+                    UseJumpPower = true, -- ensure JumpPower is respected
+                    JumpPower     = 70,  -- Roblox default jump power
+                    WalkSpeed     = 18,  -- default walk speed
+                },
                 Loadout = {
                     Tool = "NinjaStar",      -- Tool name under ReplicatedStorage.ClassItems
                     Ability = "Dash"         -- Use Dash ability for now

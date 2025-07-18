@@ -191,6 +191,14 @@ local function equipClass(player, className, tier)
     if humanoid then
         humanoid.MaxHealth = tierData.MaxHealth or humanoid.MaxHealth
         humanoid.Health = humanoid.MaxHealth
+        -- Apply other humanoid settings if specified
+        if tierData.HumanoidProperties then
+            for prop, value in pairs(tierData.HumanoidProperties) do
+                if humanoid[prop] ~= nil then
+                    humanoid[prop] = value
+                end
+            end
+        end
     end
 
     -- clear existing tools
