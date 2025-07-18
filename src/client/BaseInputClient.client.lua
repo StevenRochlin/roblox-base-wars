@@ -113,7 +113,7 @@ shopGui.Enabled      = false
 shopGui.Parent       = playerGui
 
 local shopFrame = Instance.new("Frame")
-shopFrame.Size               = UDim2.new(0,300,0,260)
+shopFrame.Size               = UDim2.new(0,420,0,260)
 shopFrame.Position           = UDim2.new(0.5,-150,0.5,-130)
 shopFrame.BackgroundColor3   = Color3.fromRGB(30,30,30)
 shopFrame.BackgroundTransparency = 0.3
@@ -170,7 +170,7 @@ end)
 
 local fastStealBtn = Instance.new("TextButton")
 fastStealBtn.Size = UDim2.new(0,120,0,60)
-fastStealBtn.Position = UDim2.new(0,10,0,50)
+fastStealBtn.Position = UDim2.new(0,140,0,50)
 fastStealBtn.BackgroundColor3 = purpleColor
 fastStealBtn.BorderSizePixel = 0
 fastStealBtn.Parent = shopFrame
@@ -232,7 +232,7 @@ player:GetAttributeChangedSignal("StealAmount"):Connect(updateStealUpgradeButton
 -- New auto miner upgrade button
 local autoMineBtn = Instance.new("TextButton")
 autoMineBtn.Size = UDim2.new(0,120,0,60)
-autoMineBtn.Position = UDim2.new(0,140,0,50)
+autoMineBtn.Position = UDim2.new(0,280,0,50)
 autoMineBtn.BackgroundColor3 = skyBlueColor
 autoMineBtn.BorderSizePixel = 0
 autoMineBtn.Parent = shopFrame
@@ -294,7 +294,7 @@ player:GetAttributeChangedSignal("MineSpeed"):Connect(updateAutoMineButton)
 -- Entry Time upgrade button
 local entryBtn = Instance.new("TextButton")
 entryBtn.Size = UDim2.new(0,120,0,60)
-entryBtn.Position = UDim2.new(0,10,0,120)
+entryBtn.Position = UDim2.new(0,0,0,120)
 entryBtn.BackgroundColor3 = turquoiseColor
 entryBtn.BorderSizePixel = 0
 entryBtn.Parent = shopFrame
@@ -415,7 +415,7 @@ player:GetAttributeChangedSignal("StorageLevel"):Connect(updateStorageButton)
 -- Kill bounty upgrade button
 local bountyBtn = Instance.new("TextButton")
 bountyBtn.Size = UDim2.new(0,120,0,60)
-bountyBtn.Position = UDim2.new(0,10,0,260)
+bountyBtn.Position = UDim2.new(0,0,0,50)
 bountyBtn.BackgroundColor3 = redColor
 bountyBtn.BorderSizePixel = 0
 bountyBtn.Parent = shopFrame
