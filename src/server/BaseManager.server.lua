@@ -11,6 +11,10 @@ local RequestBaseCreation       = ReplicatedStorage:WaitForChild("RequestBaseCre
 local BasePlacementError        = ReplicatedStorage:FindFirstChild("BasePlacementError") or Instance.new("RemoteEvent")
 BasePlacementError.Name = "BasePlacementError"
 BasePlacementError.Parent = ReplicatedStorage
+
+local BaseStolenWarning         = ReplicatedStorage:FindFirstChild("BaseStolenWarning") or Instance.new("RemoteEvent")
+BaseStolenWarning.Name = "BaseStolenWarning"
+BaseStolenWarning.Parent = ReplicatedStorage
 local UpdateBaseEntryGUI        = ReplicatedStorage:WaitForChild("UpdateBaseEntryGUI")
 local OpenBaseShop              = ReplicatedStorage:WaitForChild("OpenBaseShop")
 local ChangeStealAmount         = ReplicatedStorage:WaitForChild("ChangeStealSpeed")  -- uses ChangeStealSpeed remote event
@@ -304,6 +308,11 @@ RequestBaseCreation.OnServerEvent:Connect(function(player)
 			and stealer.leaderstats:FindFirstChild("Gold")
 		if goldStat then
 			goldStat.Value = goldStat.Value + amount
+		end
+
+		-- 4) Notify owner about the theft
+		if ownerPlayer then
+			BaseStolenWarning:FireClient(ownerPlayer, "Stolen")
 		end
 	end)
 	-- after playerStealAmounts[userId] = 10

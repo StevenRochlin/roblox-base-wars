@@ -18,6 +18,7 @@ local RequestBaseCreation = ReplicatedStorage:WaitForChild("RequestBaseCreation"
 local DisplayBasePrompt   = ReplicatedStorage:WaitForChild("DisplayBasePrompt")
 local UpdateBaseEntryGUI  = ReplicatedStorage:WaitForChild("UpdateBaseEntryGUI")
 local BasePlacementError = ReplicatedStorage:WaitForChild("BasePlacementError")
+local BaseStolenWarning  = ReplicatedStorage:WaitForChild("BaseStolenWarning")
 
 -- new shop remotes
 local OpenBaseShop        = ReplicatedStorage:WaitForChild("OpenBaseShop")
@@ -468,6 +469,36 @@ local function hidePrompt()
 		promptGui = nil
 	end
 end
+
+-- Warning prompt when your base is stolen
+local function showStolenWarning()
+	local warnGui = Instance.new("ScreenGui")
+	warnGui.Name = "StolenWarnGui"
+	warnGui.ResetOnSpawn = false
+	warnGui.DisplayOrder = 7
+	warnGui.Parent = playerGui
+
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = UDim2.new(0.8,0,0.08,0)
+	lbl.Position = UDim2.new(0.5,0,0.1,0)
+	lbl.AnchorPoint = Vector2.new(0.5,0.5)
+	lbl.BackgroundTransparency = 1
+	lbl.TextColor3 = Color3.fromRGB(255,0,0)
+	lbl.TextStrokeColor3 = Color3.new(0,0,0)
+	lbl.TextStrokeTransparency = 0
+	lbl.TextScaled = true
+	lbl.Font = Enum.Font.SourceSansBold
+	lbl.Text = "A player has stolen from your base!"
+	lbl.Parent = warnGui
+
+	task.delay(3, function()
+		if warnGui then warnGui:Destroy() end
+	end)
+end
+
+BaseStolenWarning.OnClientEvent:Connect(function(reason)
+	showStolenWarning()
+end)
 
 -- =========================================================================--
 -- 5) REMOTE EVENT CONNECTIONS
