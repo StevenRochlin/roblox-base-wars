@@ -629,6 +629,18 @@ ChangeKillBounty.OnServerEvent:Connect(function(player)
 	data.storedGold = data.storedGold - cost
 	updateBillboard(userId)
 
+	-- Auto-deposit extra carried gold up to base capacity
+	local goldStat = stats:FindFirstChild("Gold")
+	local spaceLeft = data.maxStorage - data.storedGold
+	if goldStat and spaceLeft > 0 then
+		local deposit = math.min(goldStat.Value, spaceLeft)
+		data.storedGold = data.storedGold + deposit
+		baseGold.Value = data.storedGold
+		goldStat.Value = goldStat.Value - deposit
+		updateBillboard(userId)
+	end
+
+	-- increase level
 	playerKillBountyLevels[userId] = nextLevel
 	player:SetAttribute("KillBountyReward", killBountyRewards[nextLevel])
 end)
