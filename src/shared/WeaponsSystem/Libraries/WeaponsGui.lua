@@ -163,6 +163,21 @@ function WeaponsGui.new(weaponsSystem)
 		self.ammoLabel.Font = Enum.Font.SourceSansBold
 		self.ammoLabel.Visible = false
 		self.ammoLabel.Parent = self.gui
+        -- Weapon name label just below ammo
+        self.weaponLabel = Instance.new("TextLabel")
+        self.weaponLabel.Name = "WeaponLabel"
+        self.weaponLabel.AnchorPoint = Vector2.new(1, 0)
+        self.weaponLabel.Position = UDim2.fromScale(0.97, 0.09)
+        self.weaponLabel.Size = UDim2.fromScale(0.15, 0.04)
+        self.weaponLabel.BackgroundTransparency = 0.4
+        self.weaponLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
+        self.weaponLabel.TextColor3 = Color3.new(1,1,1)
+        self.weaponLabel.TextStrokeColor3 = Color3.new(0,0,0)
+        self.weaponLabel.TextStrokeTransparency = 0
+        self.weaponLabel.TextScaled = true
+        self.weaponLabel.Font = Enum.Font.SourceSansBold
+        self.weaponLabel.Visible = false
+        self.weaponLabel.Parent = self.gui
 	end)()
 
 	return self
@@ -432,6 +447,17 @@ function WeaponsGui:onRenderStepped(dt)
 			self.ammoLabel.Visible = false
 		end
 	end
+
+    -- Update weapon name label
+    if self.weaponLabel then
+        local weapon = self.weaponsSystem and self.weaponsSystem.currentWeapon
+        if weapon and weapon.instance and weapon.instance.Name then
+            self.weaponLabel.Text = weapon.instance.Name
+            self.weaponLabel.Visible = true
+        else
+            self.weaponLabel.Visible = false
+        end
+    end
 end
 
 function WeaponsGui:setZoomed(zoomed)
