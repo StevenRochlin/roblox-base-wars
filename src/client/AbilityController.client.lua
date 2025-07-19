@@ -15,10 +15,10 @@ end
 local FireAbility = remotesFolder:WaitForChild("FireAbility")
 local ClassConfig = require(ReplicatedStorage:WaitForChild("ClassConfig"))
 
--- Simple binding: Q -> class-specific ability
+-- Simple binding: Shift -> class-specific ability
 UserInputService.InputBegan:Connect(function(input, processed)
     if processed then return end
-    if input.KeyCode == Enum.KeyCode.Q then
+    if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.RightShift then
         local className = player:GetAttribute("ClassName") or "Archer"
         local tier = player:GetAttribute("ClassTier") or 0
         local tierData = ClassConfig[className] and ClassConfig[className].Tiers[tier]
