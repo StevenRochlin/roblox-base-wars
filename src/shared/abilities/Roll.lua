@@ -15,7 +15,7 @@ local function canUse(player)
     return false
 end
 
-function Roll.ServerActivate(player)
+function Roll.ServerActivate(player, payload)
     if not canUse(player) then return end
 
     local character = player.Character
@@ -25,8 +25,14 @@ function Roll.ServerActivate(player)
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     if not hrp or not humanoid then return end
 
-    -- Apply a stronger forward burst using BodyVelocity for reliable movement
-    local direction = hrp.CFrame.LookVector.Unit
+    -- Determine roll direction: use client-provided movement vector if valid, else face forward
+    local direction = nil
+    if payload and typeof(payload) == "Vector3" and payload.Magnitude > 0.05 then
+        direction = Vector3.new(payload.X, 0, payload.Z).Unit
+    end
+    if not direction then
+        direction = hrp.CFrame.LookVector.Unit
+    end
 
     -- Create BodyVelocity to override movement briefly
     local bv = Instance.new("BodyVelocity")
