@@ -31,16 +31,16 @@ function Dash.ServerActivate(player, payload)
     -- Determine dash direction (horizontal plane)
     local direction = nil
     if payload and typeof(payload) == "Vector3" and payload.Magnitude > 0.05 then
-        direction = Vector3.new(payload.X, 0, payload.Z).Unit
+        direction = payload.Unit
     end
     if not direction then
         direction = hrp.CFrame.LookVector.Unit
     end
 
-    -- Apply BodyVelocity for immediate acceleration then tween it to zero
+    -- Apply BodyVelocity for immediate acceleration then tween it to zero (3D direction)
     local bv = Instance.new("BodyVelocity")
     bv.Name = "DashVelocity"
-    bv.MaxForce = Vector3.new(1e5, 0, 1e5)
+    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
     bv.Velocity = direction * Dash.PeakSpeed
     bv.Parent = hrp
 

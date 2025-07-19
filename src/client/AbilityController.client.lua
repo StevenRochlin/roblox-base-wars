@@ -23,13 +23,22 @@ UserInputService.InputBegan:Connect(function(input, processed)
         local tier = player:GetAttribute("ClassTier") or 0
         local tierData = ClassConfig[className] and ClassConfig[className].Tiers[tier]
         local abilityName = (tierData and tierData.Loadout and tierData.Loadout.Ability) or "Roll"
-        -- Send movement direction (for abilities like Roll) so server can apply directional logic
-        local movementDir = Vector3.new()
-        local char = player.Character
-        local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            movementDir = humanoid.MoveDirection
+        local payloadDir = Vector3.new()
+
+        if abilityName == "Roll" then
+            -- Use movement direction for roll
+            local char = player.Character
+            local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                payloadDir = humanoid.MoveDirection
+            end
+        elseif abilityName == "Dash" then
+            -- Use camera look direction for dash
+            if workspace.CurrentCamera then
+                payloadDir = workspace.CurrentCamera.CFrame.LookVector
+            end
         end
-        FireAbility:FireServer(abilityName, movementDir)
+
+        FireAbility:FireServer(abilityName, payloadDir)
     end
 end) 
