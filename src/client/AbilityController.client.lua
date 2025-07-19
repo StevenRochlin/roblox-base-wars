@@ -17,7 +17,7 @@ local ClassConfig = require(ReplicatedStorage:WaitForChild("ClassConfig"))
 
 -- Simple binding: Shift -> class-specific ability
 UserInputService.InputBegan:Connect(function(input, processed)
-    if processed then return end
+    -- Allow Shift ability even if processed by another action (e.g., sprint)
     if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.RightShift then
         local className = player:GetAttribute("ClassName") or "Archer"
         local tier = player:GetAttribute("ClassTier") or 0
