@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local SoundAssets = require(game:GetService("ReplicatedStorage"):WaitForChild("SoundAssets"))
 
 local player = Players.LocalPlayer
 local leaderstats = player:WaitForChild("leaderstats")
@@ -17,6 +18,13 @@ local function parentGui()
 end
 parentGui()
 player.CharacterAdded:Connect(parentGui)
+
+-- Gold gain sound
+local goldSound = Instance.new("Sound")
+goldSound.Name = "GoldSound"
+goldSound.SoundId = "rbxassetid://" .. SoundAssets.Gold
+goldSound.Volume = 0.6
+goldSound.Parent = gui
 
 -- stack offset tracker
 local activeCount = 0
@@ -56,6 +64,7 @@ goldValue:GetPropertyChangedSignal("Value"):Connect(function()
     local diff = newVal - lastGold
     if diff > 0 then
         showGoldGain(diff)
+        goldSound:Play()
     end
     lastGold = newVal
 end) 

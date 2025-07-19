@@ -13,6 +13,7 @@ local SpringService = require(Libraries:WaitForChild("SpringService"))
 
 local DirectionalIndicatorGuiManager = require(Libraries:WaitForChild("DirectionalIndicatorGuiManager"))
 local DamageBillboardHandler = require(Libraries:WaitForChild("DamageBillboardHandler"))
+local SoundAssets = require(game:GetService("ReplicatedStorage"):WaitForChild("SoundAssets"))
 
 local WeaponsSystemGuiTemplate = WeaponsSystemFolder:WaitForChild("Assets"):WaitForChild("WeaponsSystemGui")
 
@@ -109,6 +110,21 @@ function WeaponsGui.new(weaponsSystem)
 
 		self.smallFireButton.Visible = false
 		self.largeFireButton.Visible = false
+
+		self.bodyShotSound = Instance.new("Sound")
+		self.bodyShotSound.SoundId = "rbxassetid://" .. SoundAssets.BodyShot
+		self.bodyShotSound.Volume = 0.5
+		self.bodyShotSound.Parent = self.gui
+
+		self.headshotSound = Instance.new("Sound")
+		self.headshotSound.SoundId = "rbxassetid://" .. SoundAssets.Headshot
+		self.headshotSound.Volume = 0.7
+		self.headshotSound.Parent = self.gui
+
+		self.killSound = Instance.new("Sound")
+		self.killSound.SoundId = "rbxassetid://" .. SoundAssets.Kill
+		self.killSound.Volume = 0.7
+		self.killSound.Parent = self.gui
 
 		self.gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 		self.gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function() self:onScreenSizeChanged() end)
@@ -326,6 +342,24 @@ function WeaponsGui:OnHitOtherPlayer(damage, humanoidHit, headshotMultiplier)
 		)
 	end
 
+	-- Play hit sounds
+	if isHeadshot then
+		if self.headshotSound then
+			self.headshotSound:Play()
+		end
+	else
+		if self.bodyShotSound then
+			self.bodyShotSound:Play()
+		end
+	end
+
+	-- Kill confirm sound
+	if humanoidHit and humanoidHit.Health - damage <= 0 then
+		if self.killSound then
+			self.killSound:Play()
+		end
+	end
+
 	-- Show & fade the hit marker
 	self.hitMarker.ImageTransparency = 0
 	local tweenInfo = TweenInfo.new(0.8)
@@ -335,10 +369,12 @@ function WeaponsGui:OnHitOtherPlayer(damage, humanoidHit, headshotMultiplier)
 
 	-- Show floating damage number (red for headshots)
 	local headPart = humanoidHit.Parent:FindFirstChild("Head")
-	if isHeadshot then
-		DamageBillboardHandler:ShowDamageBillboard(damage * headshotMultiplier, headPart, Color3.new(1, 0, 0))
-	else
-		DamageBillboardHandler:ShowDamageBillboard(damage, headPart)
+	if DamageBillboardHandler then
+		if isHeadshot then
+			DamageBillboardHandler:ShowDamageBillboard(damage * headshotMultiplier, headPart, Color3.new(1, 0, 0))
+		else
+			DamageBillboardHandler:ShowDamageBillboard(damage, headPart)
+		end
 	end
 end
 
