@@ -147,6 +147,22 @@ function WeaponsGui.new(weaponsSystem)
 			self.smallFireButton,
 			self.largeFireButton,
 		})
+
+		-- Ammo indicator (top-right)
+		self.ammoLabel = Instance.new("TextLabel")
+		self.ammoLabel.Name = "AmmoLabel"
+		self.ammoLabel.AnchorPoint = Vector2.new(1, 0)
+		self.ammoLabel.Position = UDim2.fromScale(0.97, 0.03)
+		self.ammoLabel.Size = UDim2.fromScale(0.15, 0.05)
+		self.ammoLabel.BackgroundTransparency = 0.4
+		self.ammoLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		self.ammoLabel.TextColor3 = Color3.new(1,1,1)
+		self.ammoLabel.TextStrokeColor3 = Color3.new(0,0,0)
+		self.ammoLabel.TextStrokeTransparency = 0
+		self.ammoLabel.TextScaled = true
+		self.ammoLabel.Font = Enum.Font.SourceSansBold
+		self.ammoLabel.Visible = false
+		self.ammoLabel.Parent = self.gui
 	end)()
 
 	return self
@@ -398,6 +414,22 @@ function WeaponsGui:onRenderStepped(dt)
 			self.reloadLabel.Visible = true
 		else
 			self.reloadLabel.Visible = false
+		end
+	end
+
+	-- Update ammo label
+	if self.ammoLabel then
+		local weapon = self.weaponsSystem and self.weaponsSystem.currentWeapon
+		if weapon and weapon.getAmmoInWeapon then
+			local current = weapon:getAmmoInWeapon()
+			local cap = 0
+			if weapon.getConfigValue then
+				cap = weapon:getConfigValue("AmmoCapacity", 0)
+			end
+			self.ammoLabel.Text = string.format("%d / %d", current, cap)
+			self.ammoLabel.Visible = true
+		else
+			self.ammoLabel.Visible = false
 		end
 	end
 end
