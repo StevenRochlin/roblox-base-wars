@@ -3,8 +3,8 @@ local TweenService = game:GetService("TweenService")
 local Dash = {}
 
 Dash.Cooldown = 3 -- seconds
-Dash.PeakSpeed = 160  -- studs per second
-Dash.Duration = 0.85  -- total dash time
+Dash.PeakSpeed = 200  -- studs per second
+Dash.Duration = 0.5  -- total dash time 
 
 local lastUse = {}
 
@@ -37,20 +37,21 @@ function Dash.ServerActivate(player, payload)
         direction = hrp.CFrame.LookVector.Unit
     end
 
-    -- Apply BodyVelocity for immediate acceleration then tween it to zero (3D direction)
+    -- Apply BodyVelocity for immediate acceleration; we'll cut it off instantly later
     local bv = Instance.new("BodyVelocity")
     bv.Name = "DashVelocity"
     bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
     bv.Velocity = direction * Dash.PeakSpeed
     bv.Parent = hrp
 
-    -- Tween velocity to zero over Duration with ease-out
-    local tween = TweenService:Create(bv, TweenInfo.new(Dash.Duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Velocity = Vector3.new()})
-    tween:Play()
-
-    tween.Completed:Connect(function()
+    -- After the set duration, instantly stop by removing BodyVelocity and clearing momentum
+    task.delay(Dash.Duration, function()
         if bv and bv.Parent then
             bv:Destroy()
+        end
+        -- Zero out all velocity so momentum doesn't carry after dash
+        if hrp and hrp.Parent then
+            hrp.AssemblyLinearVelocity = Vector3.new()
         end
     end)
 end
