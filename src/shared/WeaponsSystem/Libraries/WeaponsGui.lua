@@ -60,6 +60,22 @@ function WeaponsGui.new(weaponsSystem)
 		self.crosshairLeft = self.crosshairFrame:WaitForChild("Left")
 		self.crosshairRight = self.crosshairFrame:WaitForChild("Right")
 		self.crosshairTop = self.crosshairFrame:WaitForChild("Top")
+
+		-- Reload indicator (hidden by default)
+		self.reloadLabel = Instance.new("TextLabel")
+		self.reloadLabel.Name = "ReloadLabel"
+		self.reloadLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+		self.reloadLabel.Position = UDim2.fromScale(0.5, 0.62) -- slightly below crosshair centre
+		self.reloadLabel.Size = UDim2.fromScale(0.2, 0.04)
+		self.reloadLabel.BackgroundTransparency = 1
+		self.reloadLabel.Text = "Reloading..."
+		self.reloadLabel.Font = Enum.Font.SourceSansBold
+		self.reloadLabel.TextColor3 = Color3.new(1, 1, 1)
+		self.reloadLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+		self.reloadLabel.TextStrokeTransparency = 0
+		self.reloadLabel.TextScaled = true
+		self.reloadLabel.Visible = false
+		self.reloadLabel.Parent = self.scalingElementsFolder
 		self.origCrosshairScales = {} -- these will be used to size crosshair pieces when screen size changes
 		self.origCrosshairScales[self.crosshairBottom] = Vector2.new(self.crosshairBottom.Size.X.Scale, self.crosshairBottom.Size.Y.Scale)
 		self.origCrosshairScales[self.crosshairLeft] = Vector2.new(self.crosshairLeft.Size.X.Scale, self.crosshairLeft.Size.Y.Scale)
@@ -337,6 +353,16 @@ function WeaponsGui:onRenderStepped(dt)
 	if self.crosshairFrame and self.crosshairEnabled then
 		local crosshairSize = self.crosshairNormalSize * self.crosshairScale * self.crosshairWeaponScale
 		self.crosshairFrame.Size = UDim2.new(0, crosshairSize.X, 0, crosshairSize.Y)
+	end
+
+	-- Update reload indicator visibility
+	if self.reloadLabel then
+		local currentWeapon = self.weaponsSystem and self.weaponsSystem.currentWeapon
+		if currentWeapon and currentWeapon.reloading then
+			self.reloadLabel.Visible = true
+		else
+			self.reloadLabel.Visible = false
+		end
 	end
 end
 
