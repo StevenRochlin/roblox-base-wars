@@ -33,10 +33,15 @@ UserInputService.InputBegan:Connect(function(input, processed)
                 payloadDir = humanoid.MoveDirection
             end
         elseif abilityName == "Dash" then
-            -- Use camera look direction for dash
-            if workspace.CurrentCamera then
-                payloadDir = workspace.CurrentCamera.CFrame.LookVector
+            -- Combine camera look (for vertical component) with movement direction (for horizontal)
+            local camLook = workspace.CurrentCamera and workspace.CurrentCamera.CFrame.LookVector or Vector3.new(0,0,-1)
+            local moveDir = Vector3.new()
+            local char = player.Character
+            local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                moveDir = humanoid.MoveDirection
             end
+            payloadDir = {lookDir = camLook, moveDir = moveDir}
         end
 
         FireAbility:FireServer(abilityName, payloadDir)
