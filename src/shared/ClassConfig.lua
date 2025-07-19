@@ -5,7 +5,12 @@ return {
         Tiers = {
             [0] = {
                 Cost = 0,               -- free for now
-                MaxHealth = 100,
+                MaxHealth = 200,
+                HumanoidProperties = {
+                    UseJumpPower = true,
+                    JumpPower     = 50,
+                    WalkSpeed     = 16,
+                },
                 -- Loadout maps slot names to asset names/ids (Tools or Abilities)
                 Loadout = {
                     Tool = "Crossbow",      -- Tool name under ReplicatedStorage.ClassItems
@@ -21,12 +26,12 @@ return {
         Tiers = {
             [0] = {
                 Cost = 0,               -- free for now
-                MaxHealth = 100,
+                MaxHealth = 175,
                 -- Override humanoid defaults when this class is equipped
                 HumanoidProperties = {
                     UseJumpPower = true, -- ensure JumpPower is respected
-                    JumpPower     = 70,  -- Roblox default jump power
-                    WalkSpeed     = 30,  -- default walk speed
+                    JumpPower     = 65,  
+                    WalkSpeed     = 18,  
                 },
                 Loadout = {
                     Tool = "NinjaStar",      -- Tool name under ReplicatedStorage.ClassItems
@@ -41,7 +46,12 @@ return {
         Tiers = {
             [0] = {
                 Cost = 0,
-                MaxHealth = 100,
+                MaxHealth = 200,
+                HumanoidProperties = {
+                    UseJumpPower = true,
+                    JumpPower     = 50,
+                    WalkSpeed     = 16,
+                },
                 Loadout = {
                     Tools = {"Flintlock", "Saber"},
                     Ability = "Roll"
