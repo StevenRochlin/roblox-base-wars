@@ -5,6 +5,22 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- /////////////////////////////////////////////////////////////////
+-- Disable WeaponSystem movement modifiers globally
+-- /////////////////////////////////////////////////////////////////
+do
+    local weaponsSystemFolder = ReplicatedStorage:FindFirstChild("WeaponsSystem")
+    if weaponsSystemFolder then
+        local configFolder = weaponsSystemFolder:FindFirstChild("Configuration")
+        if configFolder then
+            local sprintBool = configFolder:FindFirstChild("SprintEnabled")
+            if sprintBool then sprintBool.Value = false end
+            local slowZoomBool = configFolder:FindFirstChild("SlowZoomWalkEnabled")
+            if slowZoomBool then slowZoomBool.Value = false end
+        end
+    end
+end
+
+-- /////////////////////////////////////////////////////////////////
 -- Remote events setup
 -- /////////////////////////////////////////////////////////////////
 local remotesFolder = ReplicatedStorage:FindFirstChild("ClassRemotes")

@@ -26,7 +26,7 @@ return {
                 HumanoidProperties = {
                     UseJumpPower = true, -- ensure JumpPower is respected
                     JumpPower     = 70,  -- Roblox default jump power
-                    WalkSpeed     = 18,  -- default walk speed
+                    WalkSpeed     = 30,  -- default walk speed
                 },
                 Loadout = {
                     Tool = "NinjaStar",      -- Tool name under ReplicatedStorage.ClassItems
