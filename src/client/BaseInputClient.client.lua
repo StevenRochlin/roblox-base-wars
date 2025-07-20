@@ -633,7 +633,7 @@ end)
 UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 	if status == "StartTimer" then
 		entryDuration        = p1
-		serverEntryStartTime = p2
+		serverEntryStartTime = tick() -- use local clock to avoid offset issues
 		stopClientTimer()
 		entryTimerLabel.Text = string.format("Entering Base: %.1fs", entryDuration)
 		entryTimerLabel.Visible = true
