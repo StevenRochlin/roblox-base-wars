@@ -441,6 +441,17 @@ RunService.Heartbeat:Connect(function()
 			end
 		end
 
+		-- Heal player while inside the base
+		if state.isInDefinitiveBaseState then
+			local player = Players:GetPlayerByUserId(userId)
+			local character = player and (state.character or player.Character)
+			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+			if humanoid and humanoid.Health > 0 then
+				local HEAL_PER_SEC = 25
+				humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + HEAL_PER_SEC/60)
+			end
+		end
+
 		-- Additional safeguard: if player has already entered the base but moves away and
 		-- TouchEnded failed to fire, force a clean leave.
 		if state.isInDefinitiveBaseState then
