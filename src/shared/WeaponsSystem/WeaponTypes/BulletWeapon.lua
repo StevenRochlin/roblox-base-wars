@@ -904,8 +904,10 @@ function BulletWeapon:onActivatedChanged()
 			self:doLocalFire()
 		end
 
-		-- Reenable trigger after activated changes to false
-		if not self.activated and self.triggerDisconnected and not self.burstFiring then
+		-- Reenable trigger after the player releases OR presses again (for burst semi logic)
+		if self.triggerDisconnected and not self.burstFiring then
+			-- If the trigger was disconnected and the player is either releasing (activated false)
+			-- OR pressing again (activated true), reconnect it so the next click fires immediately.
 			self.triggerDisconnected = false
 		end
 	end
