@@ -5,6 +5,7 @@
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Place IDs (keep in sync with matchmaking constants)
 local LOBBY_PLACE_ID = 119_674_697_265_678 -- lobby place id (hard-coded)
@@ -15,9 +16,26 @@ if game.PlaceId ~= MATCH_PLACE_ID then
 	return
 end
 
-print("[MatchReturn] Match server started; players will return to lobby in 5 seconds.")
+-- Create or find RemoteEvent for countdown
+local COUNTDOWN_EVENT_NAME = "MatchReturnCountdown"
+local countdownEvent: RemoteEvent = ReplicatedStorage:FindFirstChild(COUNTDOWN_EVENT_NAME) :: RemoteEvent
+if not countdownEvent then
+	countdownEvent = Instance.new("RemoteEvent")
+	countdownEvent.Name = COUNTDOWN_EVENT_NAME
+	countdownEvent.Parent = ReplicatedStorage
+end
 
-local DELAY_SECONDS = 5
+print("[MatchReturn] Match server started; players will return to lobby in 10 seconds.")
+
+local DELAY_SECONDS = 10
+
+-- Broadcast countdown each second
+task.spawn(function()
+	for remaining = DELAY_SECONDS, 0, -1 do
+		countdownEvent:FireAllClients(remaining)
+		task.wait(1)
+	end
+end)
 
 task.delay(DELAY_SECONDS, function()
 	local players = Players:GetPlayers()
