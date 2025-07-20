@@ -31,6 +31,12 @@ local function onCharacterAdded(player: Player, character: Model)
 	humanoid.Died:Connect(function()
 		lastDamageTime[player] = tick()
 	end)
+
+	-- Remove default Roblox health regeneration script if present
+	local defaultHealthScript = character:FindFirstChild("Health")
+	if defaultHealthScript and defaultHealthScript:IsA("Script") then
+		defaultHealthScript:Destroy()
+	end
 end
 
 -- Handle new players
