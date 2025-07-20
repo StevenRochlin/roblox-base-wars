@@ -11,6 +11,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LOBBY_PLACE_ID = 119_674_697_265_678 -- lobby place id (hard-coded)
 local MATCH_PLACE_ID = 118_743_202_306_745 -- match place id (hard-coded)
 
+-- Set to false to disable returning logic temporarily
+local ENABLE_RETURN = false
+
+if not ENABLE_RETURN then
+	return -- feature disabled
+end
+
 -- Only run in the match place
 if game.PlaceId ~= MATCH_PLACE_ID then
 	return

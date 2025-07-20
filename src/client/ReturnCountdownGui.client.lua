@@ -8,6 +8,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- Place ID for match place
 local MATCH_PLACE_ID = 118_743_202_306_745
 
+local ENABLE_GUI = false
+
+if not ENABLE_GUI then
+	return
+end
+
 if game.PlaceId ~= MATCH_PLACE_ID then
 	return -- Only active in match place
 end
