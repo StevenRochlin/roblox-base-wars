@@ -646,25 +646,27 @@ UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 		baseStatusLabel.Text     = "You have entered your base"
 		baseStatusLabel.Visible  = true
 
-		-- Disable the ability to fire weapons while inside base without destroying them
+		if not _G._baseToolDisable then _G._baseToolDisable = {} end
+		-- capture currently equipped tool (if any) BEFORE unequipping
+		local equippedBefore, equippedName = nil, nil
 		local char = player.Character
+		if char then
+			for _, child in ipairs(char:GetChildren()) do
+				if child:IsA("Tool") then
+					equippedBefore = child
+					equippedName   = child.Name
+					break
+				end
+			end
+		end
+
+		-- Disable the ability to fire weapons while inside base without destroying them
 		local humanoid = char and char:FindFirstChildOfClass("Humanoid")
 		if humanoid then
 			humanoid:UnequipTools()
 		end
 
-		if not _G._baseToolDisable then _G._baseToolDisable = {} end
-		-- capture currently equipped tool (if any) before unequip
-		local equippedBefore = nil
-		if player.Character then
-			for _, child in ipairs(player.Character:GetChildren()) do
-				if child:IsA("Tool") then
-					equippedBefore = child
-					break
-				end
-			end
-		end
-		local state = { tools = {}, conns = {}, class = player:GetAttribute("ClassName"), equipped = equippedBefore }
+		local state = { tools = {}, conns = {}, class = player:GetAttribute("ClassName"), equipped = equippedBefore, equippedName = equippedName }
 		_G._baseToolDisable[player.UserId] = state
 
 		local function disableTool(tool)
@@ -705,12 +707,26 @@ UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 		-- Re-enable tools and clean up
 		local char = player.Character
 		local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid:UnequipTools()
+
+		-- Capture what the player is currently holding (may be nil)
+		local currentlyEquipped, currentName = nil, nil
+		if char then
+			for _, child in ipairs(char:GetChildren()) do
+				if child:IsA("Tool") then
+					currentlyEquipped = child
+					currentName = child.Name
+					break
+				end
+			end
 		end
 
 		local restore = _G._baseToolDisable and _G._baseToolDisable[player.UserId]
 		if restore then
+			-- Prefer the tool the player is actually holding when exiting
+			if currentlyEquipped then
+				restore.equipped = currentlyEquipped
+				restore.equippedName = currentName
+			end
 			-- Disconnect listeners
 			for _, c in pairs(restore.conns) do if c.Connected then c:Disconnect() end end
 
@@ -726,8 +742,21 @@ UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 				local toEquip = nil
 				if restore.equipped and restore.equipped.Parent and restore.equipped.Enabled then
 					toEquip = restore.equipped
-				else
-					-- fallback: first enabled tool in Backpack
+				elseif restore.equippedName then
+					-- try to find tool with same name
+					for _, container in ipairs({player.Backpack, player.Character}) do
+						for _, t in ipairs(container:GetChildren()) do
+							if t:IsA("Tool") and t.Enabled and t.Name == restore.equippedName then
+								toEquip = t
+								break
+							end
+						end
+						if toEquip then break end
+					end
+				end
+
+				-- fallback: first enabled tool if still nil
+				if not toEquip then
 					for _, t in ipairs(player.Backpack:GetChildren()) do
 						if t:IsA("Tool") and t.Enabled then
 							toEquip = t
