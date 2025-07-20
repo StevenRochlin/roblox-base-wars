@@ -673,6 +673,11 @@ task.spawn(function()
 					local spaceLeft = maxStorage - data.storedGold
 					if spaceLeft > 0 then
 						local add = math.min(speed, spaceLeft)
+						-- Farmer class passive: +50% gold from auto miner
+						local owner = Players:GetPlayerByUserId(userId)
+						if owner and owner:GetAttribute("ClassName") == "Farmer" then
+							add = add * 1.5
+						end
 						data.storedGold = data.storedGold + add
 						updateBillboard(userId)
 						local owner = Players:GetPlayerByUserId(userId)

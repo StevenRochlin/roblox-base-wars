@@ -59,4 +59,22 @@ return {
             },
         },
     },
+    Farmer = {
+        DisplayName = "Farmer",
+        Tiers = {
+            [0] = {
+                Cost = 0,
+                MaxHealth = 225,
+                HumanoidProperties = {
+                    UseJumpPower = true,
+                    JumpPower = 50,
+                    WalkSpeed = 16,
+                },
+                Loadout = {
+                    Tools = {"Pitchfork", "Rifle22"}, -- Ensure these tools exist under ReplicatedStorage.ClassItems
+                    Ability = "Roll", -- reuse roll for now
+                },
+            },
+        },
+    },
 } 

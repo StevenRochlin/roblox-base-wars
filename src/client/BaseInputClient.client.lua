@@ -180,6 +180,18 @@ pirateBtn.MouseButton1Click:Connect(function()
     RequestClassEquip:FireServer("Pirate", 0)
 end)
 
+-- Farmer class button
+local farmerBtn = Instance.new("TextButton")
+farmerBtn.Name = "FarmerButton"
+farmerBtn.Size = UDim2.new(0, 120, 0, 60)
+farmerBtn.Position = UDim2.new(0, 400, 0, 190)
+farmerBtn.Text = "Farmer"
+farmerBtn.TextScaled = true
+farmerBtn.Parent = shopFrame
+farmerBtn.MouseButton1Click:Connect(function()
+    RequestClassEquip:FireServer("Farmer", 0)
+end)
+
 local fastStealBtn = Instance.new("TextButton")
 fastStealBtn.Size = UDim2.new(0,120,0,60)
 fastStealBtn.Position = UDim2.new(0,140,0,50)
