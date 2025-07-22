@@ -281,12 +281,57 @@ end)
 -- /////////////////////////////////////////////////////////////////
 local playerCooldowns = {}
 
+-- Helper: play ability animation if AnimationId provided
+local function playAbilityAnimation(player, animationId)
+    if not animationId then return end
+    local char = player.Character
+    if not char then return end
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+
+    -- Ensure animator exists
+    local animator = humanoid:FindFirstChildOfClass("Animator")
+    if not animator then
+        animator = Instance.new("Animator")
+        animator.Parent = humanoid
+    end
+
+    -- Create temporary Animation object
+    local animation = Instance.new("Animation")
+    animation.AnimationId = "rbxassetid://" .. tostring(animationId)
+
+    local track
+    -- pcall in case animation fails to load (e.g. invalid id or permissions)
+    pcall(function()
+        track = animator:LoadAnimation(animation)
+    end)
+
+    if track then
+        track.Priority = Enum.AnimationPriority.Action4
+        track:Play()
+        -- Optionally destroy the track after it ends
+        track.Stopped:Connect(function()
+            track:Destroy()
+        end)
+    end
+
+    -- Animation instance no longer needed after loading
+    animation:Destroy()
+end
+
 FireAbility.OnServerEvent:Connect(function(player, abilityName, payload)
     local ability = AbilityRegistry[abilityName]
     if not ability then return end
 
-    -- cooldown handling in ability module (Roll.lua) already, but keep placeholder
+    -- Activate ability; we expect ServerActivate to return false when ability didn't fire (e.g., on cooldown)
+    local activated = true
     if ability.ServerActivate then
-        ability.ServerActivate(player, payload)
+        local ok = ability.ServerActivate(player, payload)
+        activated = (ok ~= false)
+    end
+
+    -- Play animation only if ability actually activated and has one defined
+    if activated and ability.AnimationId then
+        playAbilityAnimation(player, ability.AnimationId)
     end
 end) 
