@@ -224,8 +224,8 @@ createSubclassButton("Outlaw", "Outlaw", 270, 260)
 createSubclassButton("Buccaneer", "Buccaneer", 270, 330)
 
 -- Farmer subclasses
-createSubclassButton("Planter", "FriendlyPlanter", 400, 260)
-createSubclassButton("Toxic Sower", "ToxicSower", 400, 330)
+createSubclassButton("Nice Farmer", "NiceFarmer", 400, 260)
+createSubclassButton("Toxic Farmer", "ToxicFarmer", 400, 330)
 
 local fastStealBtn = Instance.new("TextButton")
 fastStealBtn.Size = UDim2.new(0,120,0,60)

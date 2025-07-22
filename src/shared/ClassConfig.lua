@@ -209,8 +209,8 @@ return {
     },
 
     -- Farmer subclasses
-    FriendlyPlanter = {
-        DisplayName = "Friendly Planter",
+    NiceFarmer = {
+        DisplayName = "Nice Farmer",
         BaseClass = "Farmer",
         Tiers = {
             [0] = {
@@ -229,8 +229,8 @@ return {
         },
     },
 
-    ToxicSower = {
-        DisplayName = "Toxic Sower",
+    ToxicFarmer = {
+        DisplayName = "Toxic Farmer",
         BaseClass = "Farmer",
         Tiers = {
             [0] = {

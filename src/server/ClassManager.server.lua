@@ -61,18 +61,24 @@ local ClassCharactersFolder = ReplicatedStorage:FindFirstChild("ClassCharacters"
 -- Helper: apply avatar
 -- /////////////////////////////////////////////////////////////////
 local function applyAvatar(player, className)
-	if not ClassAvatarsFolder then return end
+	if not ClassAvatarsFolder then return false end
 	local desc = ClassAvatarsFolder:FindFirstChild(className)
-	if not desc or not desc:IsA("HumanoidDescription") then return end
+	if not desc or not desc:IsA("HumanoidDescription") then return false end
 
 	local char = player.Character
 	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
 	if humanoid then
 		-- Apply the avatar description safely
-		pcall(function()
+		local ok, err = pcall(function()
 			humanoid:ApplyDescription(desc)
 		end)
+		if ok then
+			return true
+		else
+			warn("[ClassManager] Failed to apply avatar for " .. className .. ": " .. tostring(err))
+		end
 	end
+	return false
 end
 
 -- /////////////////////////////////////////////////////////////////
@@ -218,9 +224,17 @@ local function equipClass(player, className, tier)
 
     -- Attempt to swap full character model first. If unavailable, fallback to avatar description.
     local swapped = swapCharacterModel(player, className)
+    local avatarApplied = false
     if not swapped then
-        -- apply avatar via HumanoidDescription when no dedicated model
-        applyAvatar(player, className)
+        avatarApplied = applyAvatar(player, className)
+    end
+
+    -- Fallback: use base class avatar/model if subclass asset missing
+    if (not swapped and not avatarApplied) and config.BaseClass then
+        local baseName = config.BaseClass
+        if not swapCharacterModel(player, baseName) then
+            applyAvatar(player, baseName)
+        end
     end
 
     -- Ensure we operate on the (possibly) new character
