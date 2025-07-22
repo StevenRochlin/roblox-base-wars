@@ -183,15 +183,37 @@ end
 -- /////////////////////////////////////////////////////////////////
 local function equipClass(player, className, tier)
     tier = tier or 0
+
     local config = ClassConfig[className]
     if not config then
         warn("[ClassManager] Unknown class: " .. tostring(className))
-        return
+        return false
     end
+
     local tierData = config.Tiers[tier]
     if not tierData then
         warn("[ClassManager] Tier " .. tier .. " missing for class " .. className)
-        return
+        return false
+    end
+
+    -- Handle purchase cost / ownership for paid classes (subclasses)
+    local cost = tierData.Cost or 0
+    if cost > 0 then
+        local ownedAttr = "Owned_" .. className .. "_T" .. tostring(tier)
+        if not player:GetAttribute(ownedAttr) then
+            -- Not owned yet; check gold
+            local stats = player:FindFirstChild("leaderstats")
+            local goldVal = stats and stats:FindFirstChild("Gold")
+            if not goldVal or goldVal.Value < cost then
+                -- Cannot afford
+                warn(string.format("[ClassManager] %s cannot afford subclass %s (cost %d)", player.Name, className, cost))
+                return false
+            end
+
+            -- Deduct cost and mark owned
+            goldVal.Value -= cost
+            player:SetAttribute(ownedAttr, true)
+        end
     end
 
     -- Attempt to swap full character model first. If unavailable, fallback to avatar description.
@@ -240,6 +262,8 @@ local function equipClass(player, className, tier)
     -- Tag player attributes
     player:SetAttribute("ClassName", className)
     player:SetAttribute("ClassTier", tier)
+
+    return true
 end
 
 -- /////////////////////////////////////////////////////////////////
@@ -273,7 +297,12 @@ end
 -- Handle equip requests (future-proof)
 -- /////////////////////////////////////////////////////////////////
 RequestClassEquip.OnServerEvent:Connect(function(player, className, tier)
-    equipClass(player, className, tier or 0)
+    local success = equipClass(player, className, tier or 0)
+    -- TODO: send feedback to player if failed (e.g., not enough gold). Could fire a remote in future.
+    if not success then
+        -- For now just print
+        print(string.format("[ClassManager] Equip request failed for %s -> %s", player.Name, tostring(className)))
+    end
 end)
 
 -- /////////////////////////////////////////////////////////////////

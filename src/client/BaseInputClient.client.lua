@@ -113,7 +113,7 @@ shopGui.Enabled      = false
 shopGui.Parent       = playerGui
 
 local shopFrame = Instance.new("Frame")
-shopFrame.Size               = UDim2.new(0,420,0,260)
+shopFrame.Size               = UDim2.new(0,420,0,360) -- increased height for subclass buttons
 shopFrame.Position           = UDim2.new(0.5,-150,0.5,-130)
 shopFrame.BackgroundColor3   = Color3.fromRGB(30,30,30)
 shopFrame.BackgroundTransparency = 0.3
@@ -191,6 +191,41 @@ farmerBtn.Parent = shopFrame
 farmerBtn.MouseButton1Click:Connect(function()
     RequestClassEquip:FireServer("Farmer", 0)
 end)
+
+-- /////////////////////////////////////////////////////////////////
+-- Subclass purchase buttons (cost 500 Gold each)
+-- Coordinates: align under each class column (x=10,140,270,400) 
+-- First subclass row y=260, second y=330
+-- Helper to create button
+local function createSubclassButton(displayName, className, posX, posY)
+    local btn = Instance.new("TextButton")
+    btn.Name = className .. "Button"
+    btn.Size = UDim2.new(0, 120, 0, 60)
+    btn.Position = UDim2.new(0, posX, 0, posY)
+    btn.Text = displayName .. "\n(500G)"
+    btn.TextWrapped = true
+    btn.TextScaled = true
+    btn.Parent = shopFrame
+    btn.MouseButton1Click:Connect(function()
+        RequestClassEquip:FireServer(className, 0)
+    end)
+end
+
+-- Archer subclasses
+createSubclassButton("Musketeer", "Musketeer", 10, 260)
+createSubclassButton("Ranger", "Ranger", 10, 330)
+
+-- Ninja subclasses
+createSubclassButton("Samurai", "Samurai", 140, 260)
+createSubclassButton("Shinobi", "Shinobi", 140, 330)
+
+-- Pirate subclasses
+createSubclassButton("Outlaw", "Outlaw", 270, 260)
+createSubclassButton("Buccaneer", "Buccaneer", 270, 330)
+
+-- Farmer subclasses
+createSubclassButton("Harvester", "FriendlyHarvester", 400, 260)
+createSubclassButton("Toxic Grower", "ToxicGrower", 400, 330)
 
 local fastStealBtn = Instance.new("TextButton")
 fastStealBtn.Size = UDim2.new(0,120,0,60)

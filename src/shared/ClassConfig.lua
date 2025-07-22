@@ -77,4 +77,173 @@ return {
             },
         },
     },
+
+    -- //////////////////////////////////////////////////////////
+    -- Subclasses (cost: 500 gold each)
+    -- These inherit passives from their base class; stats are placeholders for now
+    -- //////////////////////////////////////////////////////////
+
+    -- Pirate subclasses
+    Outlaw = {
+        DisplayName = "Outlaw",
+        BaseClass = "Pirate",
+        Tiers = {
+            [0] = {
+                Cost = 500,
+                MaxHealth = 225,
+                HumanoidProperties = {
+                    UseJumpPower = true,
+                    JumpPower = 55,
+                    WalkSpeed = 17,
+                },
+                Loadout = {
+                    Tools = {"Flintlock", "Cutlass"},
+                    Ability = "Roll",
+                },
+            },
+        },
+    },
+
+    Buccaneer = {
+        DisplayName = "Buccaneer",
+        BaseClass = "Pirate",
+        Tiers = {
+            [0] = {
+                Cost = 500,
+                MaxHealth = 250,
+                HumanoidProperties = {
+                    UseJumpPower = true,
+                    JumpPower = 50,
+                    WalkSpeed = 16,
+                },
+                Loadout = {
+                    Tools = {"Blunderbuss", "Saber"},
+                    Ability = "Roll",
+                },
+            },
+        },
+    },
+
+    -- Ninja subclasses
+    Samurai = {
+        DisplayName = "Samurai",
+        BaseClass = "Ninja",
+        Tiers = {
+            [0] = {
+                Cost = 500,
+                MaxHealth = 200,
+                HumanoidProperties = {
+                    UseJumpPower = true,
+                    JumpPower = 60,
+                    WalkSpeed = 17,
+                },
+                Loadout = {
+                    Tools = {"Katana"},
+                    Ability = "Dash",
+                },
+            },
+        },
+    },
+
+    Shinobi = {
+        DisplayName = "Shinobi",
+        BaseClass = "Ninja",
+        Tiers = {
+            [0] = {
+                Cost = 500,
+                MaxHealth = 175,
+                HumanoidProperties = {
+                    UseJumpPower = true,
+                    JumpPower = 70,
+                    WalkSpeed = 18,
+                },
+                Loadout = {
+                    Tools = {"NinjaStar", "SmokeBomb"},
+                    Ability = "Dash",
+                },
+            },
+        },
+    },
+
+    -- Archer subclasses
+    Musketeer = {
+        DisplayName = "Musketeer",
+        BaseClass = "Archer",
+        Tiers = {
+            [0] = {
+                Cost = 500,
+                MaxHealth = 225,
+                HumanoidProperties = {
+                    UseJumpPower = true,
+                    JumpPower = 50,
+                    WalkSpeed = 15,
+                },
+                Loadout = {
+                    Tool = "Musket",
+                    Ability = "Roll",
+                },
+            },
+        },
+    },
+
+    Ranger = {
+        DisplayName = "Ranger",
+        BaseClass = "Archer",
+        Tiers = {
+            [0] = {
+                Cost = 500,
+                MaxHealth = 200,
+                HumanoidProperties = {
+                    UseJumpPower = true,
+                    JumpPower = 60,
+                    WalkSpeed = 17,
+                },
+                Loadout = {
+                    Tool = "Longbow",
+                    Ability = "Roll",
+                },
+            },
+        },
+    },
+
+    -- Farmer subclasses
+    FriendlyHarvester = {
+        DisplayName = "Friendly Harvester",
+        BaseClass = "Farmer",
+        Tiers = {
+            [0] = {
+                Cost = 500,
+                MaxHealth = 250,
+                HumanoidProperties = {
+                    UseJumpPower = true,
+                    JumpPower = 50,
+                    WalkSpeed = 16,
+                },
+                Loadout = {
+                    Tools = {"Pitchfork", "Hoe"},
+                    Ability = "Roll",
+                },
+            },
+        },
+    },
+
+    ToxicGrower = {
+        DisplayName = "Toxic Grower",
+        BaseClass = "Farmer",
+        Tiers = {
+            [0] = {
+                Cost = 500,
+                MaxHealth = 225,
+                HumanoidProperties = {
+                    UseJumpPower = true,
+                    JumpPower = 55,
+                    WalkSpeed = 17,
+                },
+                Loadout = {
+                    Tools = {"Pitchfork", "PoisonSprayer"},
+                    Ability = "Roll",
+                },
+            },
+        },
+    },
 } 
