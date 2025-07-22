@@ -123,10 +123,12 @@ local function onPlayerAdded(player)
                 local killer = creatorTag.Value
                 if killer ~= player then
                     local bountyReward = killer:GetAttribute("KillBountyReward") or 15
+                    local mult = killer:GetAttribute("KillGoldMultiplier") or 1
+                    local finalReward = math.floor(bountyReward * mult)
                     local killerStats = killer:FindFirstChild("leaderstats")
                     local killerGold = killerStats and killerStats:FindFirstChild("Gold")
                     if killerGold then
-                        killerGold.Value = killerGold.Value + bountyReward
+                        killerGold.Value = killerGold.Value + finalReward
                     end
                 end
             end

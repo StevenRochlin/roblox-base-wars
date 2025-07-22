@@ -300,10 +300,10 @@ RequestBaseCreation.OnServerEvent:Connect(function(player)
 
 		local sid     = stealer.UserId
 		local stealV  = playerStealAmounts[sid] or 10
-		-- Pirate passive bonus
-		if stealer:GetAttribute("ClassName") == "Pirate" then
-			stealV = math.floor(stealV * 1.5)
-		end
+
+		-- Apply subclass-specific steal multiplier
+		local stealMult = stealer:GetAttribute("StealGoldMultiplier") or 1
+		stealV = math.floor(stealV * stealMult)
 
 		local amount  = math.min(data.storedGold, stealV)
 		data.storedGold = data.storedGold - amount

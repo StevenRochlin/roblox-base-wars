@@ -263,6 +263,10 @@ local function equipClass(player, className, tier)
     player:SetAttribute("ClassName", className)
     player:SetAttribute("ClassTier", tier)
 
+    -- Apply passive multipliers (default 1)
+    player:SetAttribute("KillGoldMultiplier", tierData.KillGoldMultiplier or 1)
+    player:SetAttribute("StealGoldMultiplier", tierData.StealGoldMultiplier or 1)
+
     return true
 end
 

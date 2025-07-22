@@ -13,7 +13,7 @@ return {
                 },
                 -- Loadout maps slot names to asset names/ids (Tools or Abilities)
                 Loadout = {
-                    Tool = "Crossbow",      -- Tool name under ReplicatedStorage.ClassItems
+                    Tool = "Bow",      -- Tool name under ReplicatedStorage.ClassItems
                     Ability = "Roll"        -- Ability name handled by AbilityRegistry
                 },
             },
@@ -64,7 +64,7 @@ return {
         Tiers = {
             [0] = {
                 Cost = 0,
-                MaxHealth = 225,
+                MaxHealth = 200,
                 HumanoidProperties = {
                     UseJumpPower = true,
                     JumpPower = 50,
@@ -97,9 +97,10 @@ return {
                     WalkSpeed = 17,
                 },
                 Loadout = {
-                    Tools = {"Flintlock", "Cutlass"},
+                    Tool = "Revolver",
                     Ability = "Roll",
                 },
+                KillGoldMultiplier = 1.3,
             },
         },
     },
@@ -110,16 +111,17 @@ return {
         Tiers = {
             [0] = {
                 Cost = 500,
-                MaxHealth = 250,
+                MaxHealth = 225,
                 HumanoidProperties = {
                     UseJumpPower = true,
                     JumpPower = 50,
                     WalkSpeed = 16,
                 },
                 Loadout = {
-                    Tools = {"Blunderbuss", "Saber"},
+                    Tool = "Blunderbuss",
                     Ability = "Roll",
                 },
+                StealGoldMultiplier = 1.25,
             },
         },
     },
@@ -131,7 +133,7 @@ return {
         Tiers = {
             [0] = {
                 Cost = 500,
-                MaxHealth = 200,
+                MaxHealth = 225,
                 HumanoidProperties = {
                     UseJumpPower = true,
                     JumpPower = 60,
@@ -151,14 +153,14 @@ return {
         Tiers = {
             [0] = {
                 Cost = 500,
-                MaxHealth = 175,
+                MaxHealth = 200,
                 HumanoidProperties = {
                     UseJumpPower = true,
                     JumpPower = 70,
                     WalkSpeed = 18,
                 },
                 Loadout = {
-                    Tools = {"NinjaStar", "SmokeBomb"},
+                    Tool = "Kunai",
                     Ability = "Dash",
                 },
             },
@@ -179,7 +181,7 @@ return {
                     WalkSpeed = 15,
                 },
                 Loadout = {
-                    Tool = "Musket",
+                    Tools = {"Musket", "Saber"},
                     Ability = "Roll",
                 },
             },
@@ -192,14 +194,14 @@ return {
         Tiers = {
             [0] = {
                 Cost = 500,
-                MaxHealth = 200,
+                MaxHealth = 225,
                 HumanoidProperties = {
                     UseJumpPower = true,
                     JumpPower = 60,
                     WalkSpeed = 17,
                 },
                 Loadout = {
-                    Tool = "Longbow",
+                    Tool = "Crossbow",
                     Ability = "Roll",
                 },
             },
@@ -207,8 +209,8 @@ return {
     },
 
     -- Farmer subclasses
-    FriendlyHarvester = {
-        DisplayName = "Friendly Harvester",
+    FriendlyPlanter = {
+        DisplayName = "Friendly Planter",
         BaseClass = "Farmer",
         Tiers = {
             [0] = {
@@ -220,15 +222,15 @@ return {
                     WalkSpeed = 16,
                 },
                 Loadout = {
-                    Tools = {"Pitchfork", "Hoe"},
+                    Tool = "PumpShotgun",
                     Ability = "Roll",
                 },
             },
         },
     },
 
-    ToxicGrower = {
-        DisplayName = "Toxic Grower",
+    ToxicSower = {
+        DisplayName = "Toxic Sower",
         BaseClass = "Farmer",
         Tiers = {
             [0] = {
@@ -240,7 +242,7 @@ return {
                     WalkSpeed = 17,
                 },
                 Loadout = {
-                    Tools = {"Pitchfork", "PoisonSprayer"},
+                    Tool = "PesticideSprayer",
                     Ability = "Roll",
                 },
             },
