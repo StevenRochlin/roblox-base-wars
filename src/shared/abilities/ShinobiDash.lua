@@ -15,6 +15,12 @@ ShinobiDash.AnimationId    = "96455131735328"
 -- Internal state: last time each player used the dash
 local lastUse: {[number]: number} = {}
 
+local PhysicsService = game:GetService("PhysicsService")
+local DASH_GROUP     = "ShinobiDash"
+
+-- Ensure group exists (created elsewhere but safe)
+pcall(function() PhysicsService:CreateCollisionGroup(DASH_GROUP) end)
+
 -- =========================================================
 -- Helper functions
 -- =========================================================
@@ -83,6 +89,15 @@ function ShinobiDash.ServerActivate(player, payload)
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     if not hrp or not humanoid then return end
 
+    -- Switch collision group for all character parts to DASH_GROUP to pass through others
+    local originalGroups = {}
+    for _, part in ipairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            originalGroups[part] = PhysicsService:GetCollisionGroupName(part.CollisionGroupId)
+            PhysicsService:SetPartCollisionGroup(part, DASH_GROUP)
+        end
+    end
+
     local direction = computeDirection(hrp, payload)
 
     -- Apply initial velocity using a BodyVelocity
@@ -146,6 +161,12 @@ function ShinobiDash.ServerActivate(player, payload)
 
     -- Cleanup after dash ends
     task.delay(ShinobiDash.Duration, function()
+        -- Restore collision groups
+        for p, grpName in pairs(originalGroups) do
+            if p and p.Parent then
+                PhysicsService:SetPartCollisionGroup(p, grpName)
+            end
+        end
         if connection then connection:Disconnect() end
         if hitbox and hitbox.Parent then hitbox:Destroy() end
         if bv and bv.Parent then bv:Destroy() end
