@@ -37,7 +37,7 @@ local stealUpgradeCosts = {30, 50, 80}
 local purpleColor = Color3.fromRGB(128, 0, 128)
 local orangeColor = Color3.fromRGB(255, 165, 0)
 local mineBaseIncrement = 1
-local mineUpgradeCosts = {40, 60, 90}
+local mineUpgradeCosts = {60, 120, 240, 480, 960, 1920}
 local skyBlueColor = Color3.fromRGB(135, 206, 235)
 local entryTimeDecrement  = 0.5
 local entryUpgradeCosts   = {80, 160, 320}
@@ -301,7 +301,7 @@ autoMineTitle.Name = "AutoMineTitle"
 autoMineTitle.Size = UDim2.new(1,0,0,20)
 autoMineTitle.Position = UDim2.new(0,0,0,0)
 autoMineTitle.BackgroundTransparency = 1
-autoMineTitle.Text = "Auto Gold Miner"
+autoMineTitle.Text = "Auto Gold Miner (+1)"
 autoMineTitle.Font = Enum.Font.SourceSansBold
 autoMineTitle.TextColor3 = skyBlueColor
 autoMineTitle.TextStrokeColor3 = Color3.new(0,0,0)
@@ -314,7 +314,7 @@ autoMineLevelLabel.Name = "AutoMineLevel"
 autoMineLevelLabel.Size = UDim2.new(1,0,0,20)
 autoMineLevelLabel.Position = UDim2.new(0,0,0,20)
 autoMineLevelLabel.BackgroundTransparency = 1
-autoMineLevelLabel.Text = "[Lvl 0]"
+autoMineLevelLabel.Text = "[Lvl 1]"
 autoMineLevelLabel.Font = Enum.Font.SourceSansBold
 autoMineLevelLabel.TextColor3 = Color3.new(1,1,1)
 autoMineLevelLabel.TextStrokeColor3 = Color3.new(0,0,0)
@@ -344,7 +344,7 @@ local function updateAutoMineButton()
 	local level = rate
 	local costIndex = level + 1
 	local cost = mineUpgradeCosts[costIndex] or mineUpgradeCosts[#mineUpgradeCosts]
-	autoMineLevelLabel.Text = "[Lvl " .. level .. "]"
+	autoMineLevelLabel.Text = "[Lvl " .. (level + 1) .. "]"
 	autoMineCostLabel.Text = cost .. " Gold"
 end
 updateAutoMineButton()
@@ -376,7 +376,7 @@ entryLevelLabel.Name = "EntryUpgradeLevel"
 entryLevelLabel.Size = UDim2.new(1,0,0,20)
 entryLevelLabel.Position = UDim2.new(0,0,0,20)
 entryLevelLabel.BackgroundTransparency = 1
-entryLevelLabel.Text = "[Lvl 0]"
+entryLevelLabel.Text = "[Lvl 1]"
 entryLevelLabel.Font = Enum.Font.SourceSansBold
 entryLevelLabel.TextColor3 = Color3.new(1,1,1)
 entryLevelLabel.TextStrokeColor3 = Color3.new(0,0,0)
@@ -404,7 +404,7 @@ end)
 local function updateEntryButton()
 	local level = player:GetAttribute("EntryLevel") or 0
 	local cost = entryUpgradeCosts[level + 1] or entryUpgradeCosts[#entryUpgradeCosts]
-	entryLevelLabel.Text = "[Lvl " .. level .. "]"
+	entryLevelLabel.Text = "[Lvl " .. (level + 1) .. "]"
 	entryCostLabel.Text = cost .. " Gold"
 end
 updateEntryButton()
@@ -497,7 +497,7 @@ bountyLevelLabel.Name = "BountyLevel"
 bountyLevelLabel.Size = UDim2.new(1,0,0,20)
 bountyLevelLabel.Position = UDim2.new(0,0,0,20)
 bountyLevelLabel.BackgroundTransparency = 1
-bountyLevelLabel.Text = "[Lvl 0]"
+bountyLevelLabel.Text = "[Lvl 1]"
 bountyLevelLabel.Font = Enum.Font.SourceSansBold
 bountyLevelLabel.TextColor3 = Color3.new(1,1,1)
 bountyLevelLabel.TextStrokeColor3 = Color3.new(0,0,0)
@@ -528,7 +528,7 @@ local function updateBountyButton()
 	for idx, val in ipairs(killBountyRewards) do
 		if val == reward then level = idx-1 break end
 	end
-	bountyLevelLabel.Text = "[Lvl "..level.."]"
+	bountyLevelLabel.Text = "[Lvl "..(level+1).."]"
 	bountyCostLabel.Text = (killBountyCosts[level+2] or "Max") .. " Gold"
 end
 updateBountyButton()
@@ -817,6 +817,9 @@ UpdateBaseEntryGUI.OnClientEvent:Connect(function(status, p1, p2)
 			end
 			_G._baseToolDisable[player.UserId] = nil
 		end
+
+		-- Close shop GUI when leaving
+		shopGui.Enabled = false
 
 		-- disable it again when leaving
 		for _, desc in ipairs(workspace:GetDescendants()) do

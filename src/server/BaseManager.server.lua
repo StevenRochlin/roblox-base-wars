@@ -32,7 +32,7 @@ local UPGRADE_COST              = 50
 local stealBaseIncrement        = 10
 local stealUpgradeCosts         = {30, 50, 80}
 local mineBaseIncrement         = 1
-local mineUpgradeCosts          = {40, 60, 90}
+local mineUpgradeCosts          = {60, 120, 240, 480, 960, 1920}
 local storageLevels             = {100, 150, 230, 350}
 local entryTimeDecrement       = 0.5
 local entryUpgradeCosts        = {80, 160, 320}
@@ -667,6 +667,12 @@ task.spawn(function()
 		task.wait(1)
 		for userId, speed in pairs(playerMineSpeeds) do
 			if speed and speed > 0 then
+				local owner = Players:GetPlayerByUserId(userId)
+				-- Do NOT mine while player is safely inside their base (CanDealDamage == false)
+				if owner and owner:GetAttribute("CanDealDamage") == false then
+					continue
+				end
+
 				local data = playerBasesData[userId]
 				if data then
 					local maxStorage = data.maxStorage or storageLevels[1]
@@ -674,13 +680,11 @@ task.spawn(function()
 					if spaceLeft > 0 then
 						local add = math.min(speed, spaceLeft)
 						-- Farmer class passive: +50% gold from auto miner
-						local owner = Players:GetPlayerByUserId(userId)
 						if owner and owner:GetAttribute("ClassName") == "Farmer" then
 							add = add * 1.5
 						end
 						data.storedGold = data.storedGold + add
 						updateBillboard(userId)
-						local owner = Players:GetPlayerByUserId(userId)
 						if owner then
 							local bs = owner:FindFirstChild("leaderstats")
 								and owner.leaderstats:FindFirstChild("BaseGold")
