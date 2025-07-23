@@ -4,10 +4,18 @@ local ShinobiDash = {}
 
 -- Ability parameters
 ShinobiDash.Cooldown       = 3        -- seconds between uses
-ShinobiDash.PeakSpeed      = 260      -- studs/second (longer dash)
-ShinobiDash.Duration       = 0.6      -- dash time
-ShinobiDash.Damage         = 35       -- damage dealt to each enemy hit
+ShinobiDash.PeakSpeed      = 225      -- studs/second (2/3 of previous)
+ShinobiDash.Duration       = 0.4      -- dash time (half of previous)
+ShinobiDash.Damage         = 60       -- damage dealt to each enemy hit
 ShinobiDash.HitboxRadius   = 4        -- radius of spherical hitbox around the player whilst dashing
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local hitEvent = ReplicatedStorage:FindFirstChild("DashHitMarker")
+if not hitEvent then
+    hitEvent = Instance.new("RemoteEvent")
+    hitEvent.Name = "DashHitMarker"
+    hitEvent.Parent = ReplicatedStorage
+end
 
 -- Optional animation asset id
 ShinobiDash.AnimationId    = "96455131735328"
@@ -143,6 +151,9 @@ function ShinobiDash.ServerActivate(player, payload)
                     game.Debris:AddItem(tag, 2)
 
                     otherHumanoid:TakeDamage(ShinobiDash.Damage)
+
+                    -- Fire client-side hitmarker for immediate feedback
+                    hitEvent:FireClient(player)
 
                     -- If this hit kills the target, reset cooldown immediately after Died event fires
                     if otherHumanoid.Health - ShinobiDash.Damage <= 0 then

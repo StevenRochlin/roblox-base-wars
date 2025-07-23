@@ -3,8 +3,8 @@ local TweenService = game:GetService("TweenService")
 local Dash = {}
 
 Dash.Cooldown = 3 -- seconds
-Dash.PeakSpeed = 210  -- studs per second
-Dash.Duration = 0.5  -- total dash time 
+Dash.PeakSpeed = 160  -- studs per second (reduced to 2/3)
+Dash.Duration = 0.3  -- total dash time (halved)
 
 -- Add animation asset id (string or number)
 Dash.AnimationId = "96455131735328" -- dash animation
