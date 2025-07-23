@@ -242,7 +242,7 @@ return {
                     WalkSpeed = 17,
                 },
                 Loadout = {
-                    Tool = "PesticideSprayer",
+                    Tool = "Sprayer",
                     Ability = "Roll",
                 },
             },

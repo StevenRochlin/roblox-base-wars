@@ -97,6 +97,25 @@ function BulletWeapon.new(weaponsSystem, instance)
 		end
 	end
 
+	-- Collect spray particle emitters (e.g., for Sprayer weapon)
+	self.sprayEmitters = {}
+	local function registerSprayEmitter(obj)
+		if obj:IsA("ParticleEmitter") and (obj.Name == "EmitterTall" or obj.Name == "EmitterWide") then
+			table.insert(self.sprayEmitters, obj)
+			obj.Enabled = false -- start disabled; will toggle on activation
+		end
+	end
+
+	-- Register existing descendants
+	for _, desc in pairs(self.instance:GetDescendants()) do
+		registerSprayEmitter(desc)
+	end
+
+	-- Listen for any new descendants (covers cloning cases)
+	self.instance.DescendantAdded:Connect(function(desc)
+		registerSprayEmitter(desc)
+	end)
+
 	self:doInitialSetup()
 
 	return self
@@ -891,6 +910,13 @@ end
 
 function BulletWeapon:onActivatedChanged()
 	BaseWeapon.onActivatedChanged(self)
+
+	-- Toggle spray particle emitters (Sprayer weapon) based on activation
+	if self.sprayEmitters then
+		for _, emitter in ipairs(self.sprayEmitters) do
+			emitter.Enabled = self.activated
+		end
+	end
 
 	if not IsServer then
 		-- Reload if no ammo left in clip
