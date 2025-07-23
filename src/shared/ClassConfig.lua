@@ -71,7 +71,7 @@ return {
                     WalkSpeed = 16,
                 },
                 Loadout = {
-                    Tools = {"Pitchfork", "Rifle22"}, -- Ensure these tools exist under ReplicatedStorage.ClassItems
+                    Tools = {"Pitchfork", ".22 Rifle"}, -- Ensure these tools exist under ReplicatedStorage.ClassItems
                     Ability = "Roll", -- reuse roll for now
                 },
             },
@@ -222,7 +222,7 @@ return {
                     WalkSpeed = 16,
                 },
                 Loadout = {
-                    Tool = "PumpShotgun",
+                    Tools = {"Pitchfork", "Pump Shotgun"},
                     Ability = "Roll",
                 },
             },

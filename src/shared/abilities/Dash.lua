@@ -6,6 +6,9 @@ Dash.Cooldown = 3 -- seconds
 Dash.PeakSpeed = 210  -- studs per second
 Dash.Duration = 0.5  -- total dash time 
 
+-- Add animation asset id (string or number)
+Dash.AnimationId = "96455131735328" -- dash animation
+
 local lastUse = {}
 
 local function canUse(player)
