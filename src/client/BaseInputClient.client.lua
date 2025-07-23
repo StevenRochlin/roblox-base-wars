@@ -872,7 +872,8 @@ do
     local canJump = false
 
     local function onStateChanged(_, newState)
-        if player:GetAttribute("ClassName") ~= "Ninja" then return end
+        local cls = player:GetAttribute("ClassName")
+        if cls ~= "Ninja" and cls ~= "Shinobi" then return end
         if newState == Enum.HumanoidStateType.Landed then
             jumpCount = 0
             canJump = false
@@ -886,7 +887,8 @@ do
     end
 
     local function onJumpRequest()
-        if player:GetAttribute("ClassName") ~= "Ninja" then return end
+        local cls = player:GetAttribute("ClassName")
+        if cls ~= "Ninja" and cls ~= "Shinobi" then return end
         if canJump and jumpCount < maxJumps then
             local char = player.Character
             local humanoid = char and char:FindFirstChildOfClass("Humanoid")

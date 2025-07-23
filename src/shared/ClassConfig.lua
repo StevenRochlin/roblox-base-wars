@@ -161,7 +161,7 @@ return {
                 },
                 Loadout = {
                     Tool = "Kunai",
-                    Ability = "Dash",
+                    Ability = "ShinobiDash",
                 },
             },
         },
