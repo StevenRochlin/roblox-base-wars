@@ -18,7 +18,7 @@ local DamageBillboardHandler = {}
 
 -- CONFIGURATION
 -- Time windows (seconds)
-local MERGE_WINDOW  = 0.35  -- hits within this window are combined
+local MERGE_WINDOW  = 0.5  -- hits within this window are combined
 local FADE_DELAY    = 0.5   -- after this time the label begins fading
 
 -- (fade animation length still uses FADE_DELAY)
