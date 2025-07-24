@@ -73,16 +73,35 @@ function Roll.ServerActivate(player, payload)
 
     -- Optional: small invulnerability or animation could be inserted here
 
-    -- Clean up after a short duration
-    task.delay(0.3, function()
+    local BASE_REEQUIP_DELAY = 0.3
+    local extendedUnequip = (className == "Archer" or className == "Musketeer")
+    local reEquipDelay = BASE_REEQUIP_DELAY + (extendedUnequip and 0.4 or 0)
+
+    -- Clean up velocity after base duration (movement ends)
+    task.delay(BASE_REEQUIP_DELAY, function()
         -- Clean up velocity
         if bv and bv.Parent then
             bv:Destroy()
         end
 
-        -- Re-equip tool after roll completes, if it is still in backpack
+        -- Nothing else here; re-equip handled in separate delay below
+    end)
+
+    -- Delayed re-equip and optional insta-reload
+    task.delay(reEquipDelay, function()
         if equippedTool and equippedTool.Parent == player.Backpack then
             humanoid:EquipTool(equippedTool)
+
+            -- Musketeer passive: instant reload on roll
+            if className == "Musketeer" then
+                -- Attempt to set CurrentAmmo to capacity
+                local capVal = equippedTool:FindFirstChild("Configuration")
+                    and equippedTool.Configuration:FindFirstChild("AmmoCapacity")
+                local curAmmo = equippedTool:FindFirstChild("CurrentAmmo")
+                if capVal and curAmmo and curAmmo:IsA("IntValue") and capVal:IsA("ValueBase") then
+                    curAmmo.Value = capVal.Value
+                end
+            end
         end
     end)
 
