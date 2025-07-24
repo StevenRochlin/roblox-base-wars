@@ -16,14 +16,28 @@ end
 
 local FireAbility = remotesFolder:WaitForChild("FireAbility")
 -- Connect to billboard remote when available
-task.spawn(function()
-    local billboardRemote = remotesFolder:WaitForChild("ShowDamageBillboard", 10)
-    if billboardRemote and billboardRemote:IsA("RemoteEvent") then
-        billboardRemote.OnClientEvent:Connect(function(damage, headPart)
+local function hookBillboardRemote(remote)
+    if not remote or not remote:IsA("RemoteEvent") then return end
+    local signal = (remote :: any).OnClientEvent
+    if signal then
+        (signal :: any):Connect(function(damage, headPart)
             if DamageBillboardHandler and headPart then
                 DamageBillboardHandler:ShowDamageBillboard(damage, headPart)
             end
         end)
+    end
+end
+
+-- Attempt immediate fetch
+local billboardRemote = remotesFolder:FindFirstChild("ShowDamageBillboard")
+if billboardRemote then
+    hookBillboardRemote(billboardRemote)
+end
+
+-- Listen for remote added later
+remotesFolder.ChildAdded:Connect(function(child)
+    if child.Name == "ShowDamageBillboard" then
+        hookBillboardRemote(child)
     end
 end)
 

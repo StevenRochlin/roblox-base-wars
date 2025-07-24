@@ -24,6 +24,7 @@ end
 
 local RequestClassEquip = getOrCreateRemote("RequestClassEquip")
 local FireAbility       = getOrCreateRemote("FireAbility")
+local ShowDamageBillboard = getOrCreateRemote("ShowDamageBillboard")
 
 -- Shared modules
 local ClassConfig      = require(ReplicatedStorage:WaitForChild("ClassConfig"))
