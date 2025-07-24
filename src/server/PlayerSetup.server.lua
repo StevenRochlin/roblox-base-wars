@@ -73,8 +73,28 @@ local function onPlayerAdded(player)
                     local goldSphere = Instance.new("Part")
                     goldSphere.Name = player.Name .. "_GoldDrop"
                     goldSphere.Shape = Enum.PartType.Ball
-                    goldSphere.Size = Vector3.new(5, 5, 5)
-                    goldSphere.Color = Color3.fromRGB(0, 255, 0) -- Green
+                    -- Determine sphere color and size based on gold amount
+                    local amount = playerGold
+                    local tierColor, sizeStuds
+                    if amount <= 25 then
+                        tierColor = Color3.fromRGB(0, 255, 0) -- Green
+                        sizeStuds = 2
+                    elseif amount <= 100 then
+                        tierColor = Color3.fromRGB(0, 255, 255) -- Turquoise
+                        sizeStuds = 3
+                    elseif amount <= 250 then
+                        tierColor = Color3.fromRGB(0, 85, 255) -- Blue
+                        sizeStuds = 4
+                    elseif amount <= 750 then
+                        tierColor = Color3.fromRGB(128, 0, 255) -- Purple (matches old 5-stud sphere)
+                        sizeStuds = 5
+                    else
+                        tierColor = Color3.fromRGB(255, 0, 0) -- Red
+                        sizeStuds = 6
+                    end
+
+                    goldSphere.Size = Vector3.new(sizeStuds, sizeStuds, sizeStuds)
+                    goldSphere.Color = tierColor
                     goldSphere.Transparency = 0.5
                     goldSphere.Anchored = true
                     goldSphere.CanCollide = false
