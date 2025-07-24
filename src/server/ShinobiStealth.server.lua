@@ -18,8 +18,8 @@ local stateMap: {[number]: {
 local function setCharacterTransparency(character: Model, alpha: number)
     for _, obj in ipairs(character:GetDescendants()) do
         if obj:IsA("BasePart") or obj:IsA("Decal") then
-            -- Keep HumanoidRootPart permanently invisible
-            if obj.Name == "HumanoidRootPart" then
+            -- Keep core parts/weapon handle permanently invisible
+            if obj.Name == "HumanoidRootPart" or obj.Name == "Handle" then
                 obj.Transparency = 1
             else
                 obj.Transparency = alpha
@@ -33,7 +33,8 @@ RunService.Heartbeat:Connect(function()
     for _, player in ipairs(Players:GetPlayers()) do
         local uid = player.UserId
         local cls = player:GetAttribute("ClassName")
-        local canInvis = cls == "Shinobi" and (player:GetAttribute("CanDealDamage") ~= false)
+        local disabledUntil = player:GetAttribute("StealthDisabledUntil") or 0
+        local canInvis = cls == "Shinobi" and (player:GetAttribute("CanDealDamage") ~= false) and (tick() >= disabledUntil)
 
         local char = player.Character
         local hrp  = char and char:FindFirstChild("HumanoidRootPart")
@@ -76,4 +77,29 @@ RunService.Heartbeat:Connect(function()
             end
         end
     end
-end) 
+end)
+
+-- Remove any previous weapon event listeners (cleanup) and rely on attribute set by WeaponsSystem.doDamage
+
+-- Also cancel invisibility when Shinobi activates (fires or swings) a weapon
+coroutine.wrap(function()
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local wsFolder = ReplicatedStorage:WaitForChild("WeaponsSystem")
+    local netFolder = wsFolder:WaitForChild("Network", math.huge)
+    local weaponActivated = netFolder:WaitForChild("WeaponActivated", math.huge)
+    weaponActivated.OnServerEvent:Connect(function(player, instance, activated)
+        if activated and player:GetAttribute("ClassName") == "Shinobi" then
+            local uid = player.UserId
+            local entry = stateMap[uid]
+            if entry then
+                entry.currentAlpha = 0
+                entry.lastMove = tick()
+            end
+            local char = player.Character
+            if char then
+                setCharacterTransparency(char, 0)
+            end
+            player:SetAttribute("StealthDisabledUntil", tick() + 3)
+        end
+    end)
+end)() 

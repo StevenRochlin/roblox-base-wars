@@ -519,6 +519,12 @@ function WeaponsSystem.doDamage(target, amount, damageType, dealer, hitInfo, dam
 		local handler = _damageCallback or _defaultDamageCallback
 		handler(WeaponsSystem, target, amount, damageType, dealer, hitInfo, damageData)
 	end
+
+	-- Play hit indicator for damage etc
+	-- Shinobi: exiting stealth on attack
+	if dealer and dealer:IsA("Player") and dealer:GetAttribute("ClassName") == "Shinobi" then
+		dealer:SetAttribute("StealthDisabledUntil", tick() + 3)
+	end
 end
 
 local function _defaultGetTeamCallback(player)

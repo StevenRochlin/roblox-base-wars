@@ -135,6 +135,13 @@ end
 -- Runs when the player clicks / taps to attack
 function MeleeWeapon:onActivatedChanged()
     BaseWeapon.onActivatedChanged(self)
+    -- Notify server to cancel Shinobi invis if they attack with melee
+    if not IsServer and self.player == Players.LocalPlayer and self.activated and self.player:GetAttribute("ClassName") == "Shinobi" then
+        local remote = self.weaponsSystem.getRemoteEvent("WeaponActivated")
+        if remote then
+            remote:FireServer(self.instance, true)
+        end
+    end
 
     if not self.activated or not self.canSlash then
         return
