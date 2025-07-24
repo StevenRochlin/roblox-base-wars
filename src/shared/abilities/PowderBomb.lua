@@ -119,6 +119,28 @@ function PowderBomb.ServerActivate(player, payload)
 
         local pos = rootPart.Position
 
+        -- Play explosion sound (sound id: 7128851174)
+        local snd = Instance.new("Sound")
+        snd.SoundId = "rbxassetid://7128851174"
+        snd.Volume = 1
+        snd.RollOffMode = Enum.RollOffMode.Inverse
+        snd.RollOffMaxDistance = 120
+        snd.Parent = workspace
+        snd:Play()
+        Debris:AddItem(snd, 3)
+
+        -- Remote setup for billboard numbers
+        local remotesFolder = ReplicatedStorage:FindFirstChild("ClassRemotes")
+        local dmgRemote
+        if remotesFolder then
+            dmgRemote = remotesFolder:FindFirstChild("ShowDamageBillboard")
+            if not dmgRemote then
+                dmgRemote = Instance.new("RemoteEvent")
+                dmgRemote.Name = "ShowDamageBillboard"
+                dmgRemote.Parent = remotesFolder
+            end
+        end
+
         -- Visual explosion (optional pressure disabled to avoid physics chaos)
         local exp = Instance.new("Explosion")
         exp.Position = pos
@@ -136,6 +158,12 @@ function PowderBomb.ServerActivate(player, payload)
                     local dist = (root.Position - pos).Magnitude
                     if dist <= PowderBomb.ExplosionRadius then
                         hum:TakeDamage(PowderBomb.Damage)
+                        if dmgRemote then
+                            local head = plr.Character:FindFirstChild("Head")
+                            if head then
+                                dmgRemote:FireClient(player, PowderBomb.Damage, head)
+                            end
+                        end
                     end
                 end
             end

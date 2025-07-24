@@ -3,6 +3,8 @@ local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
+local DamageBillboardHandler = require(ReplicatedStorage:WaitForChild("WeaponsSystem"):WaitForChild("Libraries"):WaitForChild("DamageBillboardHandler"))
+
 local player = Players.LocalPlayer
 
 -- Wait for remotes folder and events
@@ -13,6 +15,18 @@ if not remotesFolder then
 end
 
 local FireAbility = remotesFolder:WaitForChild("FireAbility")
+-- Connect to billboard remote when available
+task.spawn(function()
+    local billboardRemote = remotesFolder:WaitForChild("ShowDamageBillboard", 10)
+    if billboardRemote and billboardRemote:IsA("RemoteEvent") then
+        billboardRemote.OnClientEvent:Connect(function(damage, headPart)
+            if DamageBillboardHandler and headPart then
+                DamageBillboardHandler:ShowDamageBillboard(damage, headPart)
+            end
+        end)
+    end
+end)
+
 local ClassConfig = require(ReplicatedStorage:WaitForChild("ClassConfig"))
 
 -- Simple binding: Shift -> class-specific ability
