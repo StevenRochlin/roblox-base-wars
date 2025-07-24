@@ -277,6 +277,21 @@ local function equipClass(player, className, tier)
     player:SetAttribute("ClassName", className)
     player:SetAttribute("ClassTier", tier)
 
+    -- Handle passive abilities like DoubleJump
+    if tierData.Passive then
+        local char = player.Character
+        if char then
+            local enableDJ = false
+            for _, p in ipairs(tierData.Passive) do
+                if p == "DoubleJump" then
+                    enableDJ = true
+                    break
+                end
+            end
+            char:SetAttribute("CanDoubleJump", enableDJ)
+        end
+    end
+
     -- Apply passive multipliers (default 1)
     player:SetAttribute("KillGoldMultiplier", tierData.KillGoldMultiplier or 1)
     player:SetAttribute("StealGoldMultiplier", tierData.StealGoldMultiplier or 1)

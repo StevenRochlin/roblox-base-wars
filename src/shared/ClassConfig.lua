@@ -34,9 +34,10 @@ return {
                     WalkSpeed     = 18,  
                 },
                 Loadout = {
-                    Tool = "NinjaStar",      -- Tool name under ReplicatedStorage.ClassItems
-                    Ability = "Dash"         -- Use Dash ability for now
+                    Tool = "NinjaStar",
+                    Ability = "Dash"
                 },
+                Passive = {"DoubleJump"},
             },
         },
         -- Additional UI data can be added later
@@ -140,9 +141,10 @@ return {
                     WalkSpeed = 17,
                 },
                 Loadout = {
-                    Tools = {"Katana"},
+                    Tools = {"Katana", "NinjaStar"},
                     Ability = "Dash",
                 },
+                Passive = {"DoubleJump"},
             },
         },
     },
@@ -163,6 +165,7 @@ return {
                     Tool = "Kunai",
                     Ability = "ShinobiDash",
                 },
+                Passive = {"DoubleJump"},
             },
         },
     },
