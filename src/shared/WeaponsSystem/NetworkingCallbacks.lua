@@ -68,19 +68,29 @@ function NetworkingCallbacks.WeaponReloadCanceled(player, instance)
 	end
 end
 
-function NetworkingCallbacks.WeaponHit(player, instance, hitInfo)
+function NetworkingCallbacks.WeaponHit(playerOrInstance, maybeInstance, maybeHitInfo)
 	local WeaponsSystem = NetworkingCallbacks.WeaponsSystem
-	if not WeaponsSystem then
-		return
+	if not WeaponsSystem then return end
+
+	local instance, hitInfo
+	if IsServer then
+		instance = maybeInstance
+		hitInfo  = maybeHitInfo
+	else
+		-- On client the RemoteEvent does NOT include the player argument.
+		instance = playerOrInstance
+		hitInfo  = maybeInstance
 	end
 
 	local weapon = WeaponsSystem.getWeaponForInstance(instance)
 	local weaponType = getmetatable(weapon)
-	if weapon then
-		if weapon.instance == instance and weaponType.CanHit then
-			if IsServer then
-				weapon:onHit(hitInfo)
-			end
+	if not weapon or not weaponType or not weaponType.CanHit then return end
+
+	if IsServer then
+		weapon:onHit(hitInfo)
+	else
+		if weapon.onRemoteHitClient then
+			weapon:onRemoteHitClient(hitInfo)
 		end
 	end
 end
