@@ -9,7 +9,8 @@ ChickenJockey.Cooldown  = 15 -- seconds between uses
 ChickenJockey.Duration  = 25 -- lifetime of the summon
 ChickenJockey.Damage    = 10 -- damage per hit
 ChickenJockey.HitRadius = 4  -- studs for melee hit
-ChickenJockey.Health    = 40
+ChickenJockey.Health    = 100
+ChickenJockey.Speed     = 19  -- walk speed
 
 -- /////////////////////////////////////////////////////////////////
 local lastUse = {}
@@ -78,7 +79,7 @@ function ChickenJockey.ServerActivate(player)
     if humanoid then
         humanoid.MaxHealth = ChickenJockey.Health
         humanoid.Health = ChickenJockey.Health
-        humanoid.WalkSpeed = 14
+        humanoid.WalkSpeed = ChickenJockey.Speed
     end
 
     -- Move to spawn position slightly in front of player
@@ -91,6 +92,8 @@ function ChickenJockey.ServerActivate(player)
     local alive = true
     local hitCool = 0
     local startTime = tick()
+    local lastPos = primary and primary.Position or Vector3.new()
+    local lastMoveCheck = tick()
 
     -- damage function
     local function tryDamage(targetChar)
@@ -139,6 +142,16 @@ function ChickenJockey.ServerActivate(player)
             end
             if goalPos and humanoid then
                 humanoid:MoveTo(goalPos)
+            end
+
+            -- Stuck detection every 0.4s
+            if primary and tick() - lastMoveCheck >= 0.4 then
+                local distMoved = (primary.Position - lastPos).Magnitude
+                if distMoved < 0.8 then
+                    humanoid.Jump = true
+                end
+                lastPos = primary.Position
+                lastMoveCheck = tick()
             end
         end
         alive = false
