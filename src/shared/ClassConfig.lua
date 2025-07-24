@@ -13,7 +13,7 @@ return {
                 },
                 -- Loadout maps slot names to asset names/ids (Tools or Abilities)
                 Loadout = {
-                    Tool = "Bow",      -- Tool name under ReplicatedStorage.ClassItems
+                    Tool = "Crossbow",      -- Tool name under ReplicatedStorage.ClassItems
                     Ability = "Roll"        -- Ability name handled by AbilityRegistry
                 },
             },
@@ -95,7 +95,7 @@ return {
                 HumanoidProperties = {
                     UseJumpPower = true,
                     JumpPower = 55,
-                    WalkSpeed = 17,
+                    WalkSpeed = 16,
                 },
                 Loadout = {
                     Tool = "Revolver",
@@ -138,7 +138,7 @@ return {
                 HumanoidProperties = {
                     UseJumpPower = true,
                     JumpPower = 60,
-                    WalkSpeed = 17,
+                    WalkSpeed = 16,
                 },
                 Loadout = {
                     Tools = {"Katana", "NinjaStar"},
@@ -181,11 +181,11 @@ return {
                 HumanoidProperties = {
                     UseJumpPower = true,
                     JumpPower = 50,
-                    WalkSpeed = 15,
+                    WalkSpeed = 16,
                 },
                 Loadout = {
                     Tools = {"Musket", "Saber"},
-                    Ability = "ChickenJockey",
+                    Ability = "Roll",
                 },
             },
         },
@@ -201,11 +201,11 @@ return {
                 HumanoidProperties = {
                     UseJumpPower = true,
                     JumpPower = 60,
-                    WalkSpeed = 17,
+                    WalkSpeed = 16,
                 },
                 Loadout = {
                     Tool = "Crossbow",
-                    Ability = "ChickenJockey",
+                    Ability = "Roll",
                 },
             },
         },
@@ -242,7 +242,7 @@ return {
                 HumanoidProperties = {
                     UseJumpPower = true,
                     JumpPower = 55,
-                    WalkSpeed = 17,
+                    WalkSpeed = 16,
                 },
                 Loadout = {
                     Tool = "Sprayer",

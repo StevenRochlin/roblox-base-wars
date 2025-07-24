@@ -63,6 +63,16 @@ function ChickenJockey.ServerActivate(player)
     summon.Name = player.Name .. "_Jockey"
     summon.Parent = workspace
 
+    -- Remove any Tools or attack scripts that could harm the summoner
+    for _, d in ipairs(summon:GetDescendants()) do
+        if d:IsA("Tool") then
+            d:Destroy()
+        elseif d:IsA("Script") or d:IsA("ModuleScript") then
+            -- Disable scripts that might perform default damage logic
+            d.Disabled = true
+        end
+    end
+
     -- Assume model with Humanoid
     local humanoid = summon:FindFirstChildOfClass("Humanoid")
     if humanoid then
@@ -84,11 +94,23 @@ function ChickenJockey.ServerActivate(player)
 
     -- damage function
     local function tryDamage(targetChar)
-        if not targetChar then return end
+        if not targetChar or targetChar == char then return end
         local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
         local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
         if targetHum and targetRoot and targetHum.Health > 0 then
             if (targetRoot.Position - primary.Position).Magnitude <= ChickenJockey.HitRadius then
+                -- Tag for kill attribution
+                local existing = targetHum:FindFirstChild("creator")
+                if not existing then
+                    local tag = Instance.new("ObjectValue")
+                    tag.Name = "creator"
+                    tag.Value = player
+                    tag.Parent = targetHum
+                    Debris:AddItem(tag, 2) -- auto-remove after short duration
+                elseif existing.Value ~= player then
+                    existing.Value = player
+                end
+
                 targetHum:TakeDamage(ChickenJockey.Damage)
             end
         end
