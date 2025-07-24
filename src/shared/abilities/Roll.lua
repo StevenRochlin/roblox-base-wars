@@ -40,6 +40,8 @@ function Roll.ServerActivate(player, payload)
 
     if not isRanger and equippedTool then
         humanoid:UnequipTools()
+        -- Tell client to keep camera/crosshair active while unequipped
+        player:SetAttribute("RollingCameraHold", true)
     end
 
     -- Damage boost window (used later in WeaponsSystem)
@@ -102,6 +104,11 @@ function Roll.ServerActivate(player, payload)
                     curAmmo.Value = capVal.Value
                 end
             end
+        end
+
+        -- Clear camera-hold flag
+        if player:GetAttribute("RollingCameraHold") then
+            player:SetAttribute("RollingCameraHold", nil)
         end
     end)
 

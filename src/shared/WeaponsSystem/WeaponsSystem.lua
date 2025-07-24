@@ -380,14 +380,17 @@ function WeaponsSystem.setWeaponEquipped(weapon, equipped)
 
 			if ConfigurationValues.UseCamOnlyWhenEquipped.Value then
 				local weaponUser = weapon.player
-				local weaponUserHumanoid = weaponUser.Character:FindFirstChildOfClass("Humanoid")
+				-- Preserve camera/crosshair during roll if flag set
+				if not weaponUser:GetAttribute("RollingCameraHold") then
+					local weaponUserHumanoid = weaponUser.Character:FindFirstChildOfClass("Humanoid")
 
-				WeaponsSystem.camera:setEnabled(false)
-				WeaponsSystem.gui:setEnabled(false)
-				WeaponsSystem.camera.mouseLocked = false
-				--selene: allow(incorrect_standard_library_use)
-				workspace.CurrentCamera.CameraSubject = weaponUserHumanoid
-				WeaponsSystem.camera.currnetCamera = workspace.CurrentCamera
+					WeaponsSystem.camera:setEnabled(false)
+					WeaponsSystem.gui:setEnabled(false)
+					WeaponsSystem.camera.mouseLocked = false
+					--selene: allow(incorrect_standard_library_use)
+					workspace.CurrentCamera.CameraSubject = weaponUserHumanoid
+					WeaponsSystem.camera.currnetCamera = workspace.CurrentCamera
+				end
 			end
 		else
 			weaponChanged = false
