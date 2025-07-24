@@ -487,6 +487,18 @@ end
 
 -- This function keeps the held weapon from bouncing up and down too much when you move
 function ShoulderCamera:applyRootJointFix()
+    -- Skip root-joint stabilisation for weapons that don't need the gun holding pose (e.g., melee weapons)
+    if self.weaponsSystem and self.weaponsSystem.currentWeapon then
+        local weapon = self.weaponsSystem.currentWeapon
+        -- If weapon explicitly asks to disable root joint fix or the weapon cannot aim down sights, skip.
+        local disableFix = false
+        if weapon.getConfigValue then
+            disableFix = weapon:getConfigValue("DisableRootJointFix", false)
+        end
+        if disableFix or not weapon.CanAimDownSights then
+            return
+        end
+    end
 	if self.rootJoint then
 		local translationScale = self.zoomState and Vector3.new(0.25, 0.25, 0.25) or Vector3.new(0.5, 0.5, 0.5)
 		local rotationScale = self.zoomState and 0.15 or 0.2
