@@ -800,7 +800,7 @@ function BulletWeapon:onHit(hitInfo)
 			local shooterHum = self.player and self.player.Character and self.player.Character:FindFirstChildOfClass("Humanoid")
 			if shooterHum and shooterHum.Health > 0 then
 				local reflectDmg = self:calculateDamage(hitInfo.d)
-				self.weaponsSystem.doDamage(shooterHum, reflectDmg, "Deflect", nil)
+				shooterHum:TakeDamage(reflectDmg) -- direct damage, ignores friendly-fire filters
 			end
 			return -- cancel original damage / effects
 		end
