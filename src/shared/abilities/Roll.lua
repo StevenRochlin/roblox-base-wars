@@ -33,8 +33,26 @@ function Roll.ServerActivate(player, payload)
 
     -- Temporarily unequip any held tool to avoid weapon hold offsets interfering with the roll animation
     local equippedTool = character:FindFirstChildOfClass("Tool")
-    if equippedTool then
+
+    -- Rangers keep their weapon during roll and gain a temporary damage boost
+    local className = player:GetAttribute("ClassName")
+    local isRanger = (className == "Ranger")
+
+    if not isRanger and equippedTool then
         humanoid:UnequipTools()
+    end
+
+    -- Damage boost window (used later in WeaponsSystem)
+    if isRanger then
+        local boostDuration = 1 -- allow some time for arrow flight after roll
+        player:SetAttribute("RangerRollBoostEnd", tick() + boostDuration)
+        -- Optional cleanup after it expires (attribute auto-cleared)
+        task.delay(boostDuration, function()
+            -- Only clear if still same value (avoid race)
+            if player:GetAttribute("RangerRollBoostEnd") and player:GetAttribute("RangerRollBoostEnd") < tick() then
+                player:SetAttribute("RangerRollBoostEnd", nil)
+            end
+        end)
     end
 
     -- Determine roll direction: use client-provided movement vector if valid, else face forward

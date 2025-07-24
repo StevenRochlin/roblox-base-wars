@@ -248,6 +248,7 @@ return {
                     Tool = "Sprayer",
                     Ability = "Roll",
                 },
+                Passive = {"PesticideCloud"},
             },
         },
     },

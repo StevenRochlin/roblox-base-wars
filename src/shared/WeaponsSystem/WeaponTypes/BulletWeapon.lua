@@ -821,7 +821,15 @@ function BulletWeapon:onHit(hitInfo)
 		then
 			-- Show hit indicators on gui of client that shot projectile if players are not on same team
 			local guiMultiplier = (hitPart.Name == "Head") and headshotMultiplier or 1
-			self.weaponsSystem.gui:OnHitOtherPlayer(self:calculateDamage(hitInfo.d), hitInfo.h, guiMultiplier)
+
+			local displayDamage = self:calculateDamage(hitInfo.d)
+			-- Apply Ranger roll bonus for display if still active
+			local boostEnd = self.player and self.player:GetAttribute("RangerRollBoostEnd")
+			if boostEnd and tick() <= boostEnd then
+				displayDamage *= 1.25
+			end
+
+			self.weaponsSystem.gui:OnHitOtherPlayer(displayDamage, hitInfo.h, guiMultiplier)
 		end
 	end
 

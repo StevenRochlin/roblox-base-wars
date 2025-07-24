@@ -490,6 +490,14 @@ function WeaponsSystem.doDamage(target, amount, damageType, dealer, hitInfo, dam
 			return
 		end
 	end
+	-- Ranger temporary damage bonus when firing during roll
+	if dealer and dealer:IsA("Player") then
+		local boostEnd = dealer:GetAttribute("RangerRollBoostEnd")
+		if boostEnd and tick() <= boostEnd then
+			amount = amount * 1.25
+		end
+	end
+
 	if IsServer then
 		if target:IsA("Humanoid") and dealer:IsA("Player") and dealer.Character then
 			local dealerHumanoid = dealer.Character:FindFirstChildOfClass("Humanoid")
