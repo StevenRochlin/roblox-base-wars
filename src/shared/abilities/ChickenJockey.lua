@@ -74,16 +74,34 @@ function ChickenJockey.ServerActivate(player)
         end
     end
 
+    -- Determine primary/root part first so Died handler can reference it
+    local primary = summon.PrimaryPart or summon:FindFirstChild("HumanoidRootPart") or summon:FindFirstChildWhichIsA("BasePart")
+
     -- Assume model with Humanoid
     local humanoid = summon:FindFirstChildOfClass("Humanoid")
     if humanoid then
         humanoid.MaxHealth = ChickenJockey.Health
         humanoid.Health = ChickenJockey.Health
         humanoid.WalkSpeed = ChickenJockey.Speed
+
+        -- Play death sound when jockey is defeated
+        humanoid.Died:Connect(function()
+            local snd = Instance.new("Sound")
+            snd.SoundId = "rbxassetid://6845870387"
+            snd.Volume = 1
+            snd.RollOffMode = Enum.RollOffMode.Inverse
+            snd.RollOffMaxDistance = 80
+            if primary and primary:IsA("BasePart") then
+                snd.Parent = primary
+            else
+                snd.Parent = summon
+            end
+            snd:Play()
+            Debris:AddItem(snd, 4)
+        end)
     end
 
     -- Move to spawn position slightly in front of player
-    local primary = summon.PrimaryPart or summon:FindFirstChild("HumanoidRootPart") or summon:FindFirstChildWhichIsA("BasePart")
     if primary then
         primary.CFrame = root.CFrame * CFrame.new(2, 0, -2)
     end
@@ -91,6 +109,7 @@ function ChickenJockey.ServerActivate(player)
     -- Simple AI coroutine
     local alive = true
     local hitCool = 0
+    local lastDamageTime = 0
     local startTime = tick()
     local lastPos = primary and primary.Position or Vector3.new()
     local lastMoveCheck = tick()
@@ -101,7 +120,10 @@ function ChickenJockey.ServerActivate(player)
         local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
         local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
         if targetHum and targetRoot and targetHum.Health > 0 then
-            if (targetRoot.Position - primary.Position).Magnitude <= ChickenJockey.HitRadius then
+            local offset = targetRoot.Position - primary.Position
+            local horizDist = Vector3.new(offset.X,0,offset.Z).Magnitude
+            local vertDiff = math.abs(offset.Y)
+            if horizDist <= ChickenJockey.HitRadius and vertDiff <= 6 then
                 -- Tag for kill attribution
                 local existing = targetHum:FindFirstChild("creator")
                 if not existing then
@@ -115,6 +137,7 @@ function ChickenJockey.ServerActivate(player)
                 end
 
                 targetHum:TakeDamage(ChickenJockey.Damage)
+                lastDamageTime = tick()
             end
         end
     end
@@ -147,7 +170,7 @@ function ChickenJockey.ServerActivate(player)
             -- Stuck detection every 0.4s
             if primary and tick() - lastMoveCheck >= 0.4 then
                 local distMoved = (primary.Position - lastPos).Magnitude
-                if distMoved < 0.8 then
+                if distMoved < 0.8 and (tick() - lastDamageTime) > 0.4 then
                     humanoid.Jump = true
                 end
                 lastPos = primary.Position
