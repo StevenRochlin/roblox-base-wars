@@ -237,4 +237,15 @@ function MeleeWeapon:onRemoteHitClient(hitInfo)
     self.weaponsSystem.gui:OnHitOtherPlayer(damage, humanoid, 1)
 end
 
+-- Melee weapons never reload; override to no-op so BaseWeapon doesn’t start a reload coroutine
+function MeleeWeapon:reload()
+    -- Do nothing
+end
+
+-- Report non-zero ammo so BaseWeapon’s equip check doesn’t attempt a reload,
+-- and return nil to WeaponsGui so ammo label stays hidden.
+function MeleeWeapon:getAmmoInWeapon()
+    return 1 -- melee weapons conceptually have infinite ammo; prevents reload logic and keeps GUI harmless
+end
+
 return MeleeWeapon 
