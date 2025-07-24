@@ -55,7 +55,7 @@ return {
                 },
                 Loadout = {
                     Tools = {"Flintlock", "Saber"},
-                    Ability = "Roll"
+                    Ability = "PowderBomb"
                 },
             },
         },
@@ -99,7 +99,7 @@ return {
                 },
                 Loadout = {
                     Tool = "Revolver",
-                    Ability = "Roll",
+                    Ability = "PowderBomb",
                 },
                 KillGoldMultiplier = 1.3,
             },
@@ -120,7 +120,7 @@ return {
                 },
                 Loadout = {
                     Tool = "Blunderbuss",
-                    Ability = "Roll",
+                    Ability = "PowderBomb",
                 },
                 StealGoldMultiplier = 1.25,
             },
