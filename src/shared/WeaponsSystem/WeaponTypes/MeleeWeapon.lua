@@ -86,12 +86,48 @@ function MeleeWeapon:onEquippedChanged()
         if handle and handle:FindFirstChild("Equip") then
             handle.Equip:Play()
         end
+
+        -- Disable shoulder camera zoom while melee weapon is equipped
+        if self.weaponsSystem and self.weaponsSystem.camera then
+            self._prevCanZoom = self.weaponsSystem.camera.canZoom
+            self.weaponsSystem.camera.canZoom = false
+            self.weaponsSystem.camera:updateZoomState()
+        end
+
+        -- Bind right-click for deflect ability on local client
+        if self.player == Players.LocalPlayer then
+            local UserInputService = game:GetService("UserInputService")
+            self._deflectInputConn = UserInputService.InputBegan:Connect(function(input, processed)
+                if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                    -- Fire ability to server
+                    local RS = game:GetService("ReplicatedStorage")
+                    local remotes = RS:WaitForChild("ClassRemotes",10)
+                    local fireAbility = remotes and remotes:FindFirstChild("FireAbility")
+                    if fireAbility then
+                        fireAbility:FireServer("Deflect")
+                    end
+                end
+            end)
+        end
     else
         self.canSlash = false
         self.canDmg = false
 
         if handle and handle:FindFirstChild("UnEquip") then
             handle.UnEquip:Play()
+        end
+
+        -- Restore camera zoom ability when weapon unequipped
+        if self.weaponsSystem and self.weaponsSystem.camera then
+            self.weaponsSystem.camera.canZoom = (self._prevCanZoom ~= nil) and self._prevCanZoom or true
+            self.weaponsSystem.camera:updateZoomState()
+            self._prevCanZoom = nil
+        end
+
+        -- Disconnect right-click binding if exists
+        if self._deflectInputConn then
+            self._deflectInputConn:Disconnect()
+            self._deflectInputConn = nil
         end
     end
 end

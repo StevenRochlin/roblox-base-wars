@@ -751,6 +751,27 @@ function BulletWeapon:calculateDamage(travelDistance)
 end
 
 function BulletWeapon:applyDamage(hitInfo)
+	-- Check deflect attribute on target character
+	if hitInfo.h and hitInfo.h:IsA("Humanoid") then
+		local char = hitInfo.h.Parent
+		if char and char:GetAttribute("Deflecting") then
+			-- Reflect: spawn new projectile towards deflector look direction hitting original shooter
+			if self.player and self.player.Character then
+				local deflectorRoot = char:FindFirstChild("HumanoidRootPart")
+				if deflectorRoot then
+					local dir = deflectorRoot.CFrame.LookVector
+					-- Fire new shot from deflector - simplified instant damage to original shooter
+					local shooterHum = self.player.Character:FindFirstChildOfClass("Humanoid")
+					if shooterHum then
+						local reflectDamage = self:calculateDamage(hitInfo.d)
+						self.weaponsSystem.doDamage(shooterHum, reflectDamage, nil, nil)
+					end
+				end
+			end
+			return
+		end
+	end
+
 	local damage = self:calculateDamage(hitInfo.d)
 	local headshotMultiplier = self:getConfigValue("HeadshotMultiplier", 2)
 
@@ -772,6 +793,18 @@ function BulletWeapon:onHit(hitInfo)
 	local headshotMultiplier = self:getConfigValue("HeadshotMultiplier", 2)
 
 	if hitPart and hitPart.Parent then
+		-- Deflect logic: if target character is deflecting, negate and reflect immediately (server)
+		local potentialChar = hitPart.Parent
+		if IsServer and potentialChar and potentialChar:GetAttribute("Deflecting") then
+			-- Reflect back to shooter (if exists)
+			local shooterHum = self.player and self.player.Character and self.player.Character:FindFirstChildOfClass("Humanoid")
+			if shooterHum and shooterHum.Health > 0 then
+				local reflectDmg = self:calculateDamage(hitInfo.d)
+				self.weaponsSystem.doDamage(shooterHum, reflectDmg, "Deflect", nil)
+			end
+			return -- cancel original damage / effects
+		end
+
 		local humanoid = self.weaponsSystem.getHumanoid(hitPart)
 		hitInfo.h = humanoid or hitPart
 
