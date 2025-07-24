@@ -10,9 +10,12 @@ PowderBomb.Cooldown = 6 -- seconds
 PowderBomb.AnimationId = "90285123596433"
 
 -- Tuning values
-PowderBomb.ThrowForce = 140          -- linear velocity applied (studs/sec)
--- Additional upward force can be added if desired
-PowderBomb.VerticalBoost = 20         -- studs/sec (set >0 to arc slightly regardless of aim)
+-- Launch parameters
+PowderBomb.ThrowForce = 100           -- studs/sec (slower travel)
+-- Additional upward force (initial)
+PowderBomb.VerticalBoost = 10         -- studs/sec
+-- Gravity scaling (1 = normal gravity, 0.6 = 40% less gravity)
+PowderBomb.GravityScale = 0.6
 PowderBomb.ExplosionRadius = 30      -- studs
 PowderBomb.Damage = 60               -- hit points dealt to enemy players
 
@@ -106,6 +109,9 @@ function PowderBomb.ServerActivate(player, payload)
     end
     rootPart.AssemblyLinearVelocity = velocity
 
+    -- Prepare anti-gravity holders (defined later)
+    local att, vForce
+
     local exploded = false
     local function explode()
         if exploded then return end
@@ -137,6 +143,30 @@ function PowderBomb.ServerActivate(player, payload)
 
         -- Clean up grenade pieces
         grenade:Destroy()
+
+        -- Cleanup anti-gravity helpers if they exist
+        if vForce and vForce.Parent then vForce:Destroy() end
+        if att and att.Parent then att:Destroy() end
+    end
+
+    -- /////////////////////////////////////////////////////////////
+    -- Apply VectorForce to reduce effective gravity (after explode defined)
+    -- /////////////////////////////////////////////////////////////
+    if PowderBomb.GravityScale < 1 then
+        local mass = rootPart.AssemblyMass
+        local g = workspace.Gravity
+        local offset = (1 - PowderBomb.GravityScale) * mass * g
+
+        att = Instance.new("Attachment")
+        att.Name = "PowderBombAttach"
+        att.Parent = rootPart
+
+        vForce = Instance.new("VectorForce")
+        vForce.Name = "AntiGravityForce"
+        vForce.Force = Vector3.new(0, offset, 0)
+        vForce.Attachment0 = att
+        vForce.RelativeTo = Enum.ActuatorRelativeTo.World
+        vForce.Parent = rootPart
     end
 
     -- Explode on first touch with non-ally object (ignore thrower)
