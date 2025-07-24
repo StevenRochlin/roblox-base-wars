@@ -10,9 +10,10 @@ PowderBomb.Cooldown = 6 -- seconds
 PowderBomb.AnimationId = "90285123596433"
 
 -- Tuning values
-PowderBomb.ThrowForce = 120          -- linear velocity applied (studs/sec)
-PowderBomb.VerticalBoost = 40        -- additional upward velocity
-PowderBomb.ExplosionRadius = 20      -- studs
+PowderBomb.ThrowForce = 140          -- linear velocity applied (studs/sec)
+-- Additional upward force can be added if desired
+PowderBomb.VerticalBoost = 20         -- studs/sec (set >0 to arc slightly regardless of aim)
+PowderBomb.ExplosionRadius = 30      -- studs
 PowderBomb.Damage = 60               -- hit points dealt to enemy players
 
 -- /////////////////////////////////////////////////////////////////
@@ -42,7 +43,7 @@ end
 -- /////////////////////////////////////////////////////////////////
 -- Public API (required by AbilityRegistry)
 -- /////////////////////////////////////////////////////////////////
-function PowderBomb.ServerActivate(player)
+function PowderBomb.ServerActivate(player, payload)
     if not canUse(player) then return end
 
     local character = player.Character
@@ -90,9 +91,20 @@ function PowderBomb.ServerActivate(player)
     -- Position a bit in front of the character
     rootPart.CFrame = hrp.CFrame * CFrame.new(0, 1.5, -2)
 
-    -- Apply velocity (forward + upward arc)
-    local lookDir = hrp.CFrame.LookVector
-    rootPart.AssemblyLinearVelocity = lookDir * PowderBomb.ThrowForce + Vector3.new(0, PowderBomb.VerticalBoost, 0)
+    -- Determine aim direction: use payload from client if valid, else fallback to character look
+    local aimDir
+    if payload and typeof(payload) == "Vector3" and payload.Magnitude > 0.001 then
+        aimDir = payload.Unit
+    else
+        aimDir = hrp.CFrame.LookVector.Unit
+    end
+
+    -- Apply velocity along aim direction, with optional vertical boost
+    local velocity = aimDir * PowderBomb.ThrowForce
+    if PowderBomb.VerticalBoost ~= 0 then
+        velocity = velocity + Vector3.new(0, PowderBomb.VerticalBoost, 0)
+    end
+    rootPart.AssemblyLinearVelocity = velocity
 
     local exploded = false
     local function explode()

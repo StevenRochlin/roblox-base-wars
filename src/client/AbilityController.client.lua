@@ -48,6 +48,10 @@ UserInputService.InputBegan:Connect(function(input, processed)
                 moveDir = humanoid.MoveDirection
             end
             payloadDir = {lookDir = camLook, moveDir = moveDir}
+        elseif abilityName == "PowderBomb" then
+            -- Use camera direction so player can aim up/down
+            local camLook = workspace.CurrentCamera and workspace.CurrentCamera.CFrame.LookVector or Vector3.new(0, 0, -1)
+            payloadDir = camLook
         end
 
         FireAbility:FireServer(abilityName, payloadDir)
