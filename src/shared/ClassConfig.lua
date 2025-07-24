@@ -73,7 +73,7 @@ return {
                 },
                 Loadout = {
                     Tools = {"Pitchfork", ".22 Rifle"}, -- Ensure these tools exist under ReplicatedStorage.ClassItems
-                    Ability = "Roll", -- reuse roll for now
+                    Ability = "ChickenJockey", -- summon helper
                 },
             },
         },
@@ -185,7 +185,7 @@ return {
                 },
                 Loadout = {
                     Tools = {"Musket", "Saber"},
-                    Ability = "Roll",
+                    Ability = "ChickenJockey",
                 },
             },
         },
@@ -205,7 +205,7 @@ return {
                 },
                 Loadout = {
                     Tool = "Crossbow",
-                    Ability = "Roll",
+                    Ability = "ChickenJockey",
                 },
             },
         },
@@ -226,7 +226,7 @@ return {
                 },
                 Loadout = {
                     Tools = {"Pitchfork", "Pump Shotgun"},
-                    Ability = "Roll",
+                    Ability = "ChickenJockey",
                 },
             },
         },
@@ -246,7 +246,7 @@ return {
                 },
                 Loadout = {
                     Tool = "Sprayer",
-                    Ability = "Roll",
+                    Ability = "ChickenJockey",
                 },
                 Passive = {"PesticideCloud"},
             },
