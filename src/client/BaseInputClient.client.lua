@@ -116,8 +116,8 @@ shopGui.Enabled      = false
 shopGui.Parent       = playerGui
 
 local shopFrame = Instance.new("Frame")
-shopFrame.Size               = UDim2.new(0,420,0,360) -- increased height for subclass buttons
-shopFrame.Position           = UDim2.new(0.5,-150,0.5,-130)
+shopFrame.Size               = UDim2.new(0,700,0,360) -- widened for info panel
+shopFrame.Position           = UDim2.new(0.5,-350,0.5,-180)
 shopFrame.BackgroundColor3   = Color3.fromRGB(30,30,30)
 shopFrame.BackgroundTransparency = 0.3
 shopFrame.Parent             = shopGui
@@ -162,6 +162,12 @@ tokenLabel.Font = Enum.Font.SourceSansBold
 tokenLabel.Text = "Tokens: " .. (player:GetAttribute("ClassTokens") or 0)
 tokenLabel.Parent = shopFrame
 
+-- Forward-declare descriptions table so linter recognizes variable before first use
+local descriptions
+
+-- Forward declare selection helper for linter
+local setSelectedItem
+
 local function updateTokenLabel()
     tokenLabel.Text = "Tokens: " .. tostring(player:GetAttribute("ClassTokens") or 0)
 end
@@ -177,7 +183,9 @@ archerBtn.Text = "Archer"
 archerBtn.TextScaled = true
 archerBtn.Parent = shopFrame
 archerBtn.MouseButton1Click:Connect(function()
-    RequestClassEquip:FireServer("Archer", 0)
+    setSelectedItem("Archer", descriptions.Archer, function()
+        RequestClassEquip:FireServer("Archer", 0)
+    end)
 end)
 
 local ninjaBtn = Instance.new("TextButton")
@@ -188,7 +196,9 @@ ninjaBtn.Text = "Ninja"
 ninjaBtn.TextScaled = true
 ninjaBtn.Parent = shopFrame
 ninjaBtn.MouseButton1Click:Connect(function()
-    RequestClassEquip:FireServer("Ninja", 0)
+    setSelectedItem("Ninja", descriptions.Ninja, function()
+        RequestClassEquip:FireServer("Ninja", 0)
+    end)
 end)
 
 -- Pirate class button
@@ -200,7 +210,9 @@ pirateBtn.Text = "Pirate"
 pirateBtn.TextScaled = true
 pirateBtn.Parent = shopFrame
 pirateBtn.MouseButton1Click:Connect(function()
-    RequestClassEquip:FireServer("Pirate", 0)
+    setSelectedItem("Pirate", descriptions.Pirate, function()
+        RequestClassEquip:FireServer("Pirate", 0)
+    end)
 end)
 
 -- Farmer class button
@@ -212,7 +224,9 @@ farmerBtn.Text = "Farmer"
 farmerBtn.TextScaled = true
 farmerBtn.Parent = shopFrame
 farmerBtn.MouseButton1Click:Connect(function()
-    RequestClassEquip:FireServer("Farmer", 0)
+    setSelectedItem("Farmer", descriptions.Farmer, function()
+        RequestClassEquip:FireServer("Farmer", 0)
+    end)
 end)
 
 -- /////////////////////////////////////////////////////////////////
@@ -231,7 +245,9 @@ local function createSubclassButton(displayName, className, posX, posY)
     btn.TextScaled = true
     btn.Parent = shopFrame
     btn.MouseButton1Click:Connect(function()
-        RequestClassEquip:FireServer(className, 0)
+        setSelectedItem(displayName, descriptions[className] or "Subclass description.", function()
+            RequestClassEquip:FireServer(className, 0)
+        end)
     end)
     table.insert(subclassButtons, {button = btn, ownedAttr = "Owned_" .. className .. "_T0"})
 end
@@ -314,7 +330,9 @@ levelLabel.TextScaled = true
 levelLabel.Parent = fastStealBtn
 
 fastStealBtn.MouseButton1Click:Connect(function()
-	ChangeStealSpeed:FireServer(stealBaseIncrement)
+    setSelectedItem("Steal Amount", descriptions.StealUpgrade, function()
+        ChangeStealSpeed:FireServer(stealBaseIncrement)
+    end)
 end)
 
 local function updateStealUpgradeButton()
@@ -375,7 +393,9 @@ autoMineCostLabel.TextScaled = true
 autoMineCostLabel.Parent = autoMineBtn
 
 autoMineBtn.MouseButton1Click:Connect(function()
-	ChangeMineSpeed:FireServer(mineBaseIncrement)
+    setSelectedItem("Auto Miner", descriptions.AutoMine, function()
+        ChangeMineSpeed:FireServer(mineBaseIncrement)
+    end)
 end)
 
 local function updateAutoMineButton()
@@ -437,7 +457,9 @@ entryCostLabel.TextScaled = true
 entryCostLabel.Parent = entryBtn
 
 entryBtn.MouseButton1Click:Connect(function()
-	ChangeEntryTime:FireServer(entryTimeDecrement)
+    setSelectedItem("Entry Timer", descriptions.EntryTime, function()
+        ChangeEntryTime:FireServer(entryTimeDecrement)
+    end)
 end)
 
 local function updateEntryButton()
@@ -497,7 +519,9 @@ storageCostLabel.TextScaled = true
 storageCostLabel.Parent = storageBtn
 
 storageBtn.MouseButton1Click:Connect(function()
-	ChangeStorageSize:FireServer()
+    setSelectedItem("Max Storage", descriptions.Storage, function()
+        ChangeStorageSize:FireServer()
+    end)
 end)
 
 local function updateStorageButton()
@@ -561,7 +585,9 @@ bountyCostLabel.TextScaled = true
 bountyCostLabel.Parent = bountyBtn
 
 bountyBtn.MouseButton1Click:Connect(function()
-	ChangeKillBounty:FireServer()
+    setSelectedItem("Kill Bounty", descriptions.KillBounty, function()
+        ChangeKillBounty:FireServer()
+    end)
 end)
 
 local function updateBountyButton()
@@ -952,6 +978,118 @@ do
 
     UserInputService.JumpRequest:Connect(onJumpRequest)
 end
+
+-- Forward declarations for linter
+local clearSelection, updateBuyButton
+
+-- =============================================================
+-- Descriptions placeholder (replace later)
+-- =============================================================
+
+descriptions = {
+    Archer       = "A skilled ranged attacker.",
+    Ninja        = "Fast and agile melee fighter.",
+    Pirate       = "Balanced fighter with firearms.",
+    Farmer       = "Utility class with farming tricks.",
+    Musketeer    = "Long-range firearm specialist.",
+    Ranger       = "Rapid-fire crossbow expert.",
+    Samurai      = "Armoured melee warrior.",
+    Shinobi      = "Stealth assassin.",
+    Outlaw       = "Quick-draw gunslinger.",
+    Buccaneer    = "Close-range demolisher.",
+    NiceFarmer   = "Supportive subclass that boosts allies.",
+    ToxicFarmer  = "Spreads poisonous clouds.",
+    StealUpgrade = "Increase how much gold you steal from enemy bases per hit.",
+    AutoMine     = "Boost the passive gold generated by your miner each second.",
+    EntryTime    = "Shorten the countdown to safely enter your base.",
+    Storage      = "Raise the maximum gold your base can store.",
+    KillBounty   = "Earn more gold for defeating opponents.",
+}
+
+-- =============================================================
+-- Info panel + Buy button UI
+-- =============================================================
+
+local infoPanel = Instance.new("Frame")
+infoPanel.Name = "InfoPanel"
+infoPanel.Size = UDim2.new(0, 260, 1, -40)
+infoPanel.Position = UDim2.new(0, 430, 0, 30)
+infoPanel.BackgroundColor3 = Color3.fromRGB(40,40,40)
+infoPanel.BackgroundTransparency = 0.1
+infoPanel.Parent = shopFrame
+
+local infoTitle = Instance.new("TextLabel")
+infoTitle.Size = UDim2.new(1,0,0,28)
+infoTitle.BackgroundTransparency = 1
+infoTitle.TextColor3 = Color3.new(1,1,1)
+infoTitle.Font = Enum.Font.SourceSansBold
+infoTitle.TextScaled = true
+infoTitle.Text = "Select an item"
+infoTitle.Parent = infoPanel
+
+local infoText = Instance.new("TextLabel")
+infoText.Size = UDim2.new(1,-10,1,-90)
+infoText.Position = UDim2.new(0,5,0,32)
+infoText.BackgroundTransparency = 1
+infoText.TextWrapped = true
+infoText.TextYAlignment = Enum.TextYAlignment.Top
+infoText.Font = Enum.Font.SourceSans
+infoText.TextColor3 = Color3.new(0.9,0.9,0.9)
+infoText.TextSize = 16
+infoText.Text = "Click an item on the left to see details."
+infoText.Parent = infoPanel
+
+local buyBtn = Instance.new("TextButton")
+buyBtn.Size = UDim2.new(1,-20,0,40)
+buyBtn.Position = UDim2.new(0,10,1,-48)
+buyBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+buyBtn.BorderSizePixel = 0
+buyBtn.TextColor3 = Color3.new(0.7,0.7,0.7)
+buyBtn.Text = "BUY"
+buyBtn.Font = Enum.Font.SourceSansBold
+buyBtn.TextScaled = true
+buyBtn.AutoButtonColor = false
+buyBtn.Parent = infoPanel
+
+-- Helpers
+local selectedPurchaseFunc = nil
+
+local function updateBuyButton()
+    if selectedPurchaseFunc then
+        buyBtn.BackgroundColor3 = Color3.fromRGB(0,170,0)
+        buyBtn.TextColor3 = Color3.new(1,1,1)
+        buyBtn.AutoButtonColor = true
+    else
+        buyBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        buyBtn.TextColor3 = Color3.new(0.7,0.7,0.7)
+        buyBtn.AutoButtonColor = false
+    end
+end
+
+function setSelectedItem(titleStr, descStr, purchaseFunc)
+    selectedPurchaseFunc = purchaseFunc
+    infoTitle.Text = titleStr
+    infoText.Text  = descStr or "(No description)"
+    updateBuyButton()
+end
+
+function clearSelection()
+    selectedPurchaseFunc = nil
+    infoTitle.Text = "Select an item"
+    infoText.Text  = "Click an item on the left to see details."
+    updateBuyButton()
+end
+
+buyBtn.MouseButton1Click:Connect(function()
+    if selectedPurchaseFunc then
+        selectedPurchaseFunc()
+        clearSelection()
+    end
+end)
+
+updateBuyButton()
+
+--- END selection system implementation
 
 
 
