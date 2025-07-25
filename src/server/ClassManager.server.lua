@@ -202,25 +202,21 @@ local function equipClass(player, className, tier)
         return false
     end
 
-    -- Handle purchase cost / ownership for paid classes (subclasses)
-    local cost = tierData.Cost or 0
-    if cost > 0 then
-        local ownedAttr = "Owned_" .. className .. "_T" .. tostring(tier)
-        if not player:GetAttribute(ownedAttr) then
-            -- Not owned yet; check gold
-            local stats = player:FindFirstChild("leaderstats")
-            local goldVal = stats and stats:FindFirstChild("Gold")
-            if not goldVal or goldVal.Value < cost then
-                -- Cannot afford
-                warn(string.format("[ClassManager] %s cannot afford subclass %s (cost %d)", player.Name, className, cost))
-                return false
-            end
-
-            -- Deduct cost and mark owned
-            goldVal.Value -= cost
-            player:SetAttribute(ownedAttr, true)
+    -- Handle purchase for subclasses using class tokens (no longer gold)
+    local isSubclass = config.BaseClass ~= nil
+    local ownedAttr = "Owned_" .. className .. "_T" .. tostring(tier)
+    if isSubclass and not player:GetAttribute(ownedAttr) then
+        local tokens = player:GetAttribute("ClassTokens") or 0
+        if tokens < 1 then
+            warn(string.format("[ClassManager] %s lacks class tokens for %s", player.Name, className))
+            return false
         end
+        -- Spend one token and mark owned
+        player:SetAttribute("ClassTokens", tokens - 1)
+        player:SetAttribute(ownedAttr, true)
     end
+
+    -- For base classes or already owned subclasses, no cost is required
 
     -- Attempt to swap full character model first. If unavailable, fallback to avatar description.
     local swapped = swapCharacterModel(player, className)
@@ -303,6 +299,11 @@ end
 -- Player setup
 -- /////////////////////////////////////////////////////////////////
 local function onPlayerAdded(player)
+    -- Ensure ClassTokens attribute exists
+    if player:GetAttribute("ClassTokens") == nil then
+        player:SetAttribute("ClassTokens", 0)
+    end
+
     -- auto-equip Archer tier 0 for now
     player.CharacterAdded:Connect(function()
         if player:GetAttribute("IsClassSwapping") then

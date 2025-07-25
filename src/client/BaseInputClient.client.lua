@@ -148,6 +148,26 @@ title.Font                 = Enum.Font.SourceSansBold
 title.TextScaled           = true
 title.Parent               = shopFrame
 
+-- Token label
+local tokenLabel = Instance.new("TextLabel")
+tokenLabel.Name = "TokenLabel"
+tokenLabel.Size = UDim2.new(0, 100, 0, 20)
+tokenLabel.Position = UDim2.new(0.5, -50, 0, 0)
+tokenLabel.AnchorPoint = Vector2.new(0.5, 0)
+tokenLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+tokenLabel.BackgroundTransparency = 0.3
+tokenLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+tokenLabel.TextScaled = true
+tokenLabel.Font = Enum.Font.SourceSansBold
+tokenLabel.Text = "Tokens: " .. (player:GetAttribute("ClassTokens") or 0)
+tokenLabel.Parent = shopFrame
+
+local function updateTokenLabel()
+    tokenLabel.Text = "Tokens: " .. tostring(player:GetAttribute("ClassTokens") or 0)
+end
+updateTokenLabel()
+player:GetAttributeChangedSignal("ClassTokens"):Connect(updateTokenLabel)
+
 -- Class selection buttons (insert above upgrades)
 local archerBtn = Instance.new("TextButton")
 archerBtn.Name = "ArcherButton"
@@ -200,18 +220,20 @@ end)
 -- Coordinates: align under each class column (x=10,140,270,400) 
 -- First subclass row y=260, second y=330
 -- Helper to create button
+local subclassButtons = {}
 local function createSubclassButton(displayName, className, posX, posY)
     local btn = Instance.new("TextButton")
     btn.Name = className .. "Button"
     btn.Size = UDim2.new(0, 120, 0, 60)
     btn.Position = UDim2.new(0, posX, 0, posY)
-    btn.Text = displayName .. "\n(500G)"
+    btn.Text = displayName .. "\n(1 Token)"
     btn.TextWrapped = true
     btn.TextScaled = true
     btn.Parent = shopFrame
     btn.MouseButton1Click:Connect(function()
         RequestClassEquip:FireServer(className, 0)
     end)
+    table.insert(subclassButtons, {button = btn, ownedAttr = "Owned_" .. className .. "_T0"})
 end
 
 -- Archer subclasses
@@ -229,6 +251,20 @@ createSubclassButton("Buccaneer", "Buccaneer", 270, 330)
 -- Farmer subclasses
 createSubclassButton("Nice Farmer", "NiceFarmer", 400, 260)
 createSubclassButton("Toxic Farmer", "ToxicFarmer", 400, 330)
+
+-- Function to enable/disable subclass buttons based on tokens
+local function updateSubclassButtons()
+    local tokens = player:GetAttribute("ClassTokens") or 0
+    for _, info in ipairs(subclassButtons) do
+        local btn = info.button
+        local owned = player:GetAttribute(info.ownedAttr) or false
+        local enabled = owned or tokens > 0
+        btn.AutoButtonColor = enabled
+        btn.TextColor3 = enabled and Color3.new(1,1,1) or Color3.new(0.6,0.6,0.6)
+    end
+end
+updateSubclassButtons()
+player:GetAttributeChangedSignal("ClassTokens"):Connect(updateSubclassButtons)
 
 local fastStealBtn = Instance.new("TextButton")
 fastStealBtn.Size = UDim2.new(0,120,0,60)

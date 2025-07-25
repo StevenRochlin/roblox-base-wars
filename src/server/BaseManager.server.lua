@@ -611,6 +611,13 @@ ChangeStorageSize.OnServerEvent:Connect(function(player)
 	-- Upgrade storage level
 	playerStorageLevels[userId] = nextLevel
 	data.maxStorage = storageLevels[nextLevel]
+
+	-- Award class token for reaching level 3 or higher (one per upgrade past level 2)
+	if nextLevel >= 3 then
+		local currentTokens = player:GetAttribute("ClassTokens") or 0
+		player:SetAttribute("ClassTokens", currentTokens + 1)
+	end
+
 	updateBaseColor(userId)
 
 	-- Sync to client
