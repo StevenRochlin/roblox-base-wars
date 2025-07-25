@@ -1164,6 +1164,37 @@ end)
 
 --- END selection system implementation
 
+-- =============================================================
+-- Winner announcement GUI
+-- =============================================================
+
+local AnnounceWinner = ReplicatedStorage:WaitForChild("AnnounceWinner")
+
+AnnounceWinner.OnClientEvent:Connect(function(winnerName)
+    local winGui = Instance.new("ScreenGui")
+    winGui.Name = "WinAnnouncementGui"
+    winGui.ResetOnSpawn = false
+    winGui.DisplayOrder = 20
+    winGui.Parent = playerGui
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1,0,1,0)
+    label.Position = UDim2.new(0,0,0,0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(255,215,0)
+    label.TextStrokeColor3 = Color3.new(0,0,0)
+    label.TextStrokeTransparency = 0
+    label.TextScaled = true
+    label.Font = Enum.Font.SourceSansBold
+    label.Text = winnerName .. " HAS REACHED 5000 GOLD AND WINS!"
+    label.Parent = winGui
+
+    -- Fade out after 10 seconds
+    task.delay(10, function()
+        if winGui then winGui:Destroy() end
+    end)
+end)
+
 
 
 

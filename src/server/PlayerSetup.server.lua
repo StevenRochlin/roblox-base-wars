@@ -30,7 +30,7 @@ local function onPlayerAdded(player)
 
     local gold = Instance.new("IntValue")
     gold.Name = "Gold"
-    gold.Value = 2000 -- Initial gold amount
+    gold.Value = 0 -- Initial gold amount
     gold.Parent = leaderstats
 
     local baseGold = Instance.new("IntValue")

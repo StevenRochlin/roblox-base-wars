@@ -25,6 +25,13 @@ local ChangeKillBounty          = ReplicatedStorage:FindFirstChild("ChangeKillBo
 ChangeKillBounty.Name = "ChangeKillBounty"
 ChangeKillBounty.Parent = ReplicatedStorage
 
+-- Remote to announce a winner (base reaches 5000 gold)
+local AnnounceWinner = ReplicatedStorage:FindFirstChild("AnnounceWinner") or Instance.new("RemoteEvent")
+AnnounceWinner.Name = "AnnounceWinner"
+AnnounceWinner.Parent = ReplicatedStorage
+
+local winnerDeclared = false
+
 -- Constants and state
 local BASE_FOLDER_NAME          = "PlayerBases"
 local BASE_ENTRY_SECONDS        = 3
@@ -82,6 +89,13 @@ local function updateBillboard(userId)
 			lbl.TextStrokeColor3 = Color3.new(0,0,0)
 			lbl.TextStrokeTransparency = 0
 		end
+	end
+
+	-- Check for win condition (5000 gold)
+	if (not winnerDeclared) and data and data.storedGold >= 5000 then
+		winnerDeclared = true
+		local winnerName = data.ownerName or "Player"
+		AnnounceWinner:FireAllClients(winnerName)
 	end
 end
 
