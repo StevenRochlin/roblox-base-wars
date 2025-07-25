@@ -152,7 +152,7 @@ title.Parent               = shopFrame
 local tokenLabel = Instance.new("TextLabel")
 tokenLabel.Name = "TokenLabel"
 tokenLabel.Size = UDim2.new(0, 100, 0, 20)
-tokenLabel.Position = UDim2.new(0.5, -50, 0, 0)
+tokenLabel.Position = UDim2.new(0.5, -10, 0, 0)
 tokenLabel.AnchorPoint = Vector2.new(0.5, 0)
 tokenLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 tokenLabel.BackgroundTransparency = 0.3
@@ -238,7 +238,7 @@ local subclassButtons = {}
 local function createSubclassButton(displayName, className, posX, posY)
     local btn = Instance.new("TextButton")
     btn.Name = className .. "Button"
-    btn.Size = UDim2.new(0, 100, 0, 45)
+    btn.Size = UDim2.new(0, 100, 0, 65)
     btn.Position = UDim2.new(0, posX, 0, posY)
     btn.Text = displayName
     btn.TextWrapped = true
@@ -247,7 +247,7 @@ local function createSubclassButton(displayName, className, posX, posY)
     local costLbl = Instance.new("TextLabel")
     costLbl.Name = "CostLabel"
     costLbl.Size = UDim2.new(1,0,0,18)
-    costLbl.Position = UDim2.new(0,0,1,-18)
+    costLbl.Position = UDim2.new(0,0,1,-18) -- automatically adjusts with new height
     costLbl.BackgroundTransparency = 1
     costLbl.Font = Enum.Font.SourceSansBold
     costLbl.TextScaled = true
@@ -264,19 +264,19 @@ end
 
 -- Archer subclasses
 createSubclassButton("Musketeer", "Musketeer", -20, 230)
-createSubclassButton("Ranger", "Ranger", -20, 285)
+createSubclassButton("Ranger", "Ranger", -20, 310)
 
 -- Ninja subclasses
 createSubclassButton("Samurai", "Samurai", 100, 230)
-createSubclassButton("Shinobi", "Shinobi", 100, 285)
+createSubclassButton("Shinobi", "Shinobi", 100, 310)
 
 -- Pirate subclasses
 createSubclassButton("Outlaw", "Outlaw", 220, 230)
-createSubclassButton("Buccaneer", "Buccaneer", 220, 285)
+createSubclassButton("Buccaneer", "Buccaneer", 220, 310)
 
 -- Farmer subclasses
 createSubclassButton("Nice Farmer", "NiceFarmer", 340, 230)
-createSubclassButton("Toxic Farmer", "ToxicFarmer", 340, 285)
+createSubclassButton("Toxic Farmer", "ToxicFarmer", 340, 310)
 
 -- Function to enable/disable subclass buttons based on tokens
 local function updateSubclassButtons()
@@ -309,7 +309,7 @@ stealLabel.Position = UDim2.new(0,0,0,0)
 stealLabel.BackgroundTransparency = 1
 stealLabel.Text = "Gold Steal Amount"
 stealLabel.Font = Enum.Font.SourceSansBold
-stealLabel.TextColor3 = purpleColor
+stealLabel.TextColor3 = Color3.new(1,1,1)
 stealLabel.TextStrokeColor3 = Color3.new(0,0,0)
 stealLabel.TextStrokeTransparency = 0
 stealLabel.TextScaled = true
@@ -373,7 +373,7 @@ autoMineTitle.Position = UDim2.new(0,0,0,0)
 autoMineTitle.BackgroundTransparency = 1
 autoMineTitle.Text = "Auto Gold Miner (+2)"
 autoMineTitle.Font = Enum.Font.SourceSansBold
-autoMineTitle.TextColor3 = skyBlueColor
+autoMineTitle.TextColor3 = Color3.new(1,1,1)
 autoMineTitle.TextStrokeColor3 = Color3.new(0,0,0)
 autoMineTitle.TextStrokeTransparency = 0
 autoMineTitle.TextScaled = true
@@ -437,7 +437,7 @@ entryTitle.Position = UDim2.new(0,0,0,0)
 entryTitle.BackgroundTransparency = 1
 entryTitle.Text = "Entry Time"
 entryTitle.Font = Enum.Font.SourceSansBold
-entryTitle.TextColor3 = turquoiseColor
+entryTitle.TextColor3 = Color3.new(1,1,1)
 entryTitle.TextStrokeColor3 = Color3.new(0,0,0)
 entryTitle.TextStrokeTransparency = 0
 entryTitle.TextScaled = true
@@ -564,7 +564,7 @@ bountyTitle.Position = UDim2.new(0,0,0,0)
 bountyTitle.BackgroundTransparency = 1
 bountyTitle.Text = "Kill Bounty"
 bountyTitle.Font = Enum.Font.SourceSansBold
-bountyTitle.TextColor3 = redColor
+bountyTitle.TextColor3 = Color3.new(1,1,1)
 bountyTitle.TextStrokeColor3 = Color3.new(0,0,0)
 bountyTitle.TextStrokeTransparency = 0
 bountyTitle.TextScaled = true
@@ -1025,7 +1025,7 @@ descriptions = {
 local infoPanel = Instance.new("Frame")
 infoPanel.Name = "InfoPanel"
 infoPanel.Size = UDim2.new(0, 260, 1, -40)
-infoPanel.Position = UDim2.new(0, 460, 0, 30) -- shifted right
+infoPanel.Position = UDim2.new(0, 480, 0, 30) -- shifted right again
 infoPanel.BackgroundColor3 = Color3.fromRGB(40,40,40)
 infoPanel.BackgroundTransparency = 0.1
 infoPanel.Parent = shopFrame
