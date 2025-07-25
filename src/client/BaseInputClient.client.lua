@@ -97,7 +97,7 @@ entryTimerLabel.Parent           = baseEntryGui
 local baseStatusLabel = Instance.new("TextLabel")
 baseStatusLabel.Name             = "BaseStatusLabel"
 baseStatusLabel.Size             = UDim2.new(0.3,0,0.08,0)
-baseStatusLabel.Position         = UDim2.new(0.5,0,0.78,0)
+baseStatusLabel.Position         = UDim2.new(0.5,0,0.88,0) -- moved lower
 baseStatusLabel.AnchorPoint      = Vector2.new(0.5,0.5)
 baseStatusLabel.BackgroundColor3 = Color3.fromRGB(20,80,20)
 baseStatusLabel.BackgroundTransparency = 0.1
@@ -116,8 +116,8 @@ shopGui.Enabled      = false
 shopGui.Parent       = playerGui
 
 local shopFrame = Instance.new("Frame")
-shopFrame.Size               = UDim2.new(0,700,0,360) -- widened for info panel
-shopFrame.Position           = UDim2.new(0.5,-350,0.5,-180)
+shopFrame.Size               = UDim2.new(0,760,0,400) -- extra space for cleaner layout
+shopFrame.Position           = UDim2.new(0.5,-390,0.5,-180) -- shifted slightly left
 shopFrame.BackgroundColor3   = Color3.fromRGB(30,30,30)
 shopFrame.BackgroundTransparency = 0.3
 shopFrame.Parent             = shopGui
@@ -125,8 +125,8 @@ shopFrame.Parent             = shopGui
 -- Close button (top‐right corner)
 local closeBtn = Instance.new("TextButton")
 closeBtn.Name               = "CloseButton"
-closeBtn.Size               = UDim2.new(0, 24, 0, 24)
-closeBtn.Position           = UDim2.new(1, -30, 0, 6)
+closeBtn.Size               = UDim2.new(0, 36, 0, 36)
+closeBtn.Position           = UDim2.new(1, -30, 0, -10)
 closeBtn.AnchorPoint        = Vector2.new(0, 0)
 closeBtn.BackgroundColor3   = Color3.fromRGB(60, 60, 60)
 closeBtn.TextColor3         = Color3.fromRGB(255, 255, 255)
@@ -177,8 +177,8 @@ player:GetAttributeChangedSignal("ClassTokens"):Connect(updateTokenLabel)
 -- Class selection buttons (insert above upgrades)
 local archerBtn = Instance.new("TextButton")
 archerBtn.Name = "ArcherButton"
-archerBtn.Size = UDim2.new(0, 120, 0, 60)
-archerBtn.Position = UDim2.new(0, -10, 0, 190)
+archerBtn.Size = UDim2.new(0, 100, 0, 45)
+archerBtn.Position = UDim2.new(0, -20, 0, 180)
 archerBtn.Text = "Archer"
 archerBtn.TextScaled = true
 archerBtn.Parent = shopFrame
@@ -190,8 +190,8 @@ end)
 
 local ninjaBtn = Instance.new("TextButton")
 ninjaBtn.Name = "NinjaButton"
-ninjaBtn.Size = UDim2.new(0, 120, 0, 60)
-ninjaBtn.Position = UDim2.new(0, 120, 0, 190)
+ninjaBtn.Size = UDim2.new(0, 100, 0, 45)
+ninjaBtn.Position = UDim2.new(0, 100, 0, 180)
 ninjaBtn.Text = "Ninja"
 ninjaBtn.TextScaled = true
 ninjaBtn.Parent = shopFrame
@@ -204,8 +204,8 @@ end)
 -- Pirate class button
 local pirateBtn = Instance.new("TextButton")
 pirateBtn.Name = "PirateButton"
-pirateBtn.Size = UDim2.new(0, 120, 0, 60)
-pirateBtn.Position = UDim2.new(0, 250, 0, 190)
+pirateBtn.Size = UDim2.new(0, 100, 0, 45)
+pirateBtn.Position = UDim2.new(0, 220, 0, 180)
 pirateBtn.Text = "Pirate"
 pirateBtn.TextScaled = true
 pirateBtn.Parent = shopFrame
@@ -218,8 +218,8 @@ end)
 -- Farmer class button
 local farmerBtn = Instance.new("TextButton")
 farmerBtn.Name = "FarmerButton"
-farmerBtn.Size = UDim2.new(0, 120, 0, 60)
-farmerBtn.Position = UDim2.new(0, 380, 0, 190)
+farmerBtn.Size = UDim2.new(0, 100, 0, 45)
+farmerBtn.Position = UDim2.new(0, 340, 0, 180)
 farmerBtn.Text = "Farmer"
 farmerBtn.TextScaled = true
 farmerBtn.Parent = shopFrame
@@ -238,7 +238,7 @@ local subclassButtons = {}
 local function createSubclassButton(displayName, className, posX, posY)
     local btn = Instance.new("TextButton")
     btn.Name = className .. "Button"
-    btn.Size = UDim2.new(0, 120, 0, 60)
+    btn.Size = UDim2.new(0, 100, 0, 45)
     btn.Position = UDim2.new(0, posX, 0, posY)
     btn.Text = displayName
     btn.TextWrapped = true
@@ -263,20 +263,20 @@ local function createSubclassButton(displayName, className, posX, posY)
 end
 
 -- Archer subclasses
-createSubclassButton("Musketeer", "Musketeer", -10, 260)
-createSubclassButton("Ranger", "Ranger", -10, 330)
+createSubclassButton("Musketeer", "Musketeer", -20, 230)
+createSubclassButton("Ranger", "Ranger", -20, 285)
 
 -- Ninja subclasses
-createSubclassButton("Samurai", "Samurai", 120, 260)
-createSubclassButton("Shinobi", "Shinobi", 120, 330)
+createSubclassButton("Samurai", "Samurai", 100, 230)
+createSubclassButton("Shinobi", "Shinobi", 100, 285)
 
 -- Pirate subclasses
-createSubclassButton("Outlaw", "Outlaw", 250, 260)
-createSubclassButton("Buccaneer", "Buccaneer", 250, 330)
+createSubclassButton("Outlaw", "Outlaw", 220, 230)
+createSubclassButton("Buccaneer", "Buccaneer", 220, 285)
 
 -- Farmer subclasses
-createSubclassButton("Nice Farmer", "NiceFarmer", 380, 260)
-createSubclassButton("Toxic Farmer", "ToxicFarmer", 380, 330)
+createSubclassButton("Nice Farmer", "NiceFarmer", 340, 230)
+createSubclassButton("Toxic Farmer", "ToxicFarmer", 340, 285)
 
 -- Function to enable/disable subclass buttons based on tokens
 local function updateSubclassButtons()
@@ -544,8 +544,7 @@ local function updateStorageButton()
 	storageCostLabel.Text = cost .. " Gold"
 
 	-- Update button color to reflect current storage level if a mapping exists
-	local col = storageColors[level] or goldColor
-	storageBtn.BackgroundColor3 = col
+	storageBtn.BackgroundColor3 = goldColor  -- keep gold regardless of level
 end
 updateStorageButton()
 player:GetAttributeChangedSignal("StorageLevel"):Connect(updateStorageButton)
@@ -1026,7 +1025,7 @@ descriptions = {
 local infoPanel = Instance.new("Frame")
 infoPanel.Name = "InfoPanel"
 infoPanel.Size = UDim2.new(0, 260, 1, -40)
-infoPanel.Position = UDim2.new(0, 430, 0, 30)
+infoPanel.Position = UDim2.new(0, 460, 0, 30) -- shifted right
 infoPanel.BackgroundColor3 = Color3.fromRGB(40,40,40)
 infoPanel.BackgroundTransparency = 0.1
 infoPanel.Parent = shopFrame
