@@ -33,26 +33,29 @@ local RequestClassEquip   = classRemotes:WaitForChild("RequestClassEquip")
 
 -- upgrade configuration
 local stealBaseIncrement = 10
-local stealUpgradeCosts = {30, 50, 80}
+local stealUpgradeCosts = {100, 200, 400, 800, 1600, 3200}
 local purpleColor = Color3.fromRGB(128, 0, 128)
 local orangeColor = Color3.fromRGB(255, 165, 0)
-local mineBaseIncrement = 1
-local mineUpgradeCosts = {60, 120, 240, 480, 960, 1920}
+local mineBaseIncrement = 2
+local mineUpgradeCosts = {60, 120, 240, 480, 960, 1920} -- unchanged
 local skyBlueColor = Color3.fromRGB(135, 206, 235)
 local entryTimeDecrement  = 0.5
 local entryUpgradeCosts   = {80, 160, 320}
 local turquoiseColor      = Color3.fromRGB(64, 224, 208)
-local storageLevels       = {100, 150, 230, 350}
+local storageLevels       = {100, 250, 500, 1000, 2500, 5000, 10000}
 local storageColors       = {
 	[1] = Color3.new(1,1,1),
 	[2] = Color3.fromRGB(0,255,0),
-	[3] = Color3.fromRGB(0,0,255),
-	[4] = Color3.fromRGB(128,0,128),
+	[3] = Color3.fromRGB(0, 242, 255),
+	[4] = Color3.fromRGB(21, 0, 255),
+	[5] = Color3.fromRGB(140, 0, 255),
+	[6] = Color3.fromRGB(255, 0, 0),
+	[7] = Color3.fromRGB(0, 0, 0),
 }
 local goldColor           = Color3.fromRGB(255, 215, 0)
 local redColor            = Color3.fromRGB(255,0,0)
-local killBountyRewards   = {15,30,60,90,120,150,180}
-local killBountyCosts     = {0,60,120,240,480,960,1920} -- index matches level
+local killBountyRewards   = {15,45,90,135,180,225,270}
+local killBountyCosts     = {0,120,240,480,960,1920,3840} -- index matches level
 
 -- =========================================================================--
 -- 2) STATE VARIABLES
@@ -301,7 +304,7 @@ autoMineTitle.Name = "AutoMineTitle"
 autoMineTitle.Size = UDim2.new(1,0,0,20)
 autoMineTitle.Position = UDim2.new(0,0,0,0)
 autoMineTitle.BackgroundTransparency = 1
-autoMineTitle.Text = "Auto Gold Miner (+1)"
+autoMineTitle.Text = "Auto Gold Miner (+2)"
 autoMineTitle.Font = Enum.Font.SourceSansBold
 autoMineTitle.TextColor3 = skyBlueColor
 autoMineTitle.TextStrokeColor3 = Color3.new(0,0,0)
@@ -341,7 +344,7 @@ end)
 
 local function updateAutoMineButton()
 	local rate = player:GetAttribute("MineSpeed") or 0
-	local level = rate
+	local level = rate / mineBaseIncrement -- 0-based upgrade count
 	local costIndex = level + 1
 	local cost = mineUpgradeCosts[costIndex] or mineUpgradeCosts[#mineUpgradeCosts]
 	autoMineLevelLabel.Text = "[Lvl " .. (level + 1) .. "]"
@@ -466,7 +469,10 @@ local function updateStorageButton()
 	local cost = storageLevels[level] or storageLevels[#storageLevels]
 	storageLevelLabel.Text = "[Lvl " .. level .. "]"
 	storageCostLabel.Text = cost .. " Gold"
-	storageBtn.BackgroundColor3 = goldColor
+
+	-- Update button color to reflect current storage level if a mapping exists
+	local col = storageColors[level] or goldColor
+	storageBtn.BackgroundColor3 = col
 end
 updateStorageButton()
 player:GetAttributeChangedSignal("StorageLevel"):Connect(updateStorageButton)

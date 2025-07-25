@@ -30,10 +30,10 @@ local BASE_FOLDER_NAME          = "PlayerBases"
 local BASE_ENTRY_SECONDS        = 3
 local UPGRADE_COST              = 50
 local stealBaseIncrement        = 10
-local stealUpgradeCosts         = {30, 50, 80}
-local mineBaseIncrement         = 1
-local mineUpgradeCosts          = {60, 120, 240, 480, 960, 1920}
-local storageLevels             = {100, 150, 230, 350}
+local stealUpgradeCosts         = {100, 200, 400, 800, 1600, 3200}
+local mineBaseIncrement         = 2
+local mineUpgradeCosts          = {60, 120, 240, 480, 960, 1920} -- unchanged (already correct)
+local storageLevels             = {100, 250, 500, 1000, 2500, 5000, 10000}
 local entryTimeDecrement       = 0.5
 local entryUpgradeCosts        = {80, 160, 320}
 local playerBasesFolder         = Workspace:FindFirstChild(BASE_FOLDER_NAME)
@@ -61,8 +61,8 @@ local playerEntryLevels = {}
 -- [ userId ] = current kill bounty level (0 default)
 local playerKillBountyLevels = {}
 
-local killBountyRewards = {30, 60, 90, 120, 150, 180}
-local killBountyCosts   = {60, 120, 240, 480, 960, 1920}
+local killBountyRewards = {45, 90, 135, 180, 225, 270}
+local killBountyCosts   = {120, 240, 480, 960, 1920, 3840}
 
 -- Update the on-base billboard
 local function updateBillboard(userId)
@@ -160,14 +160,17 @@ end
 local function updateBaseColor(userId)
 	local level = playerStorageLevels[userId] or 1
 	local colorMap = {
-		[1] = Color3.new(1,1,1),
-		[2] = Color3.fromRGB(0,255,0),
-		[3] = Color3.fromRGB(0,0,255),
-		[4] = Color3.fromRGB(128,0,128),
+		[1] = Color3.new(1,1,1),                       -- white
+		[2] = Color3.fromRGB(0,255,0),                 -- green
+		[3] = Color3.fromRGB(0,242,255),               -- cyan
+		[4] = Color3.fromRGB(21,0,255),                -- deep blue
+		[5] = Color3.fromRGB(140,0,255),               -- purple
+		[6] = Color3.fromRGB(255,0,0),                 -- red
+		[7] = Color3.fromRGB(0,0,0),                   -- black
 	}
 	local data = playerBasesData[userId]
 	if data and data.basePart and data.baseCore then
-		-- color the main base part according to storage level
+		-- color the main base part according to storage level (fallback to white)
 		local color = colorMap[level] or colorMap[1]
 		data.basePart.Color = color
 		-- always keep the inner core gold
@@ -521,14 +524,16 @@ ChangeMineSpeed.OnServerEvent:Connect(function(player, amountToAdd)
 	local baseGold = stats and stats:FindFirstChild("BaseGold")
 	if not data or not baseGold then return end
 
-	local current = playerMineSpeeds[userId] or 0
-	local nextLevel = current + amountToAdd
-	local cost = mineUpgradeCosts[nextLevel] or mineUpgradeCosts[#mineUpgradeCosts]
+	local currentSpeed = playerMineSpeeds[userId] or 0
+	local nextSpeed = currentSpeed + amountToAdd
+	-- Determine upgrade count index based on increment size
+	local costIndex = math.floor(nextSpeed / mineBaseIncrement)
+	local cost = mineUpgradeCosts[costIndex] or mineUpgradeCosts[#mineUpgradeCosts]
 	if baseGold.Value < cost then return end
 
 	-- Deduct cost
-	baseGold.Value = baseGold.Value - cost
-	data.storedGold = data.storedGold - cost
+	baseGold.Value -= cost
+	data.storedGold -= cost
 	updateBillboard(userId)
 
 	-- Auto-deposit extra carried gold up to base capacity
@@ -536,17 +541,17 @@ ChangeMineSpeed.OnServerEvent:Connect(function(player, amountToAdd)
 	local spaceLeft = data.maxStorage - data.storedGold
 	if goldStat and spaceLeft > 0 then
 		local deposit = math.min(goldStat.Value, spaceLeft)
-		data.storedGold = data.storedGold + deposit
+		data.storedGold += deposit
 		baseGold.Value = data.storedGold
-		goldStat.Value = goldStat.Value - deposit
+		goldStat.Value -= deposit
 		updateBillboard(userId)
 	end
 
 	-- Increase mine speed
-	playerMineSpeeds[userId] = nextLevel
+	playerMineSpeeds[userId] = nextSpeed
 
 	-- Sync to client
-	player:SetAttribute("MineSpeed", nextLevel)
+	player:SetAttribute("MineSpeed", nextSpeed)
 end)
 
 -- Handle entry time upgrade with cost
