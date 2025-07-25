@@ -7,6 +7,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local DisplayBasePrompt = ReplicatedStorage:WaitForChild("DisplayBasePrompt")
+local KillGoldIndicator = ReplicatedStorage:FindFirstChild("KillGoldIndicator")
+if not KillGoldIndicator then
+    KillGoldIndicator = Instance.new("RemoteEvent")
+    KillGoldIndicator.Name = "KillGoldIndicator"
+    KillGoldIndicator.Parent = ReplicatedStorage
+end
 
 local GOLD_DROP_FOLDER_NAME = "GoldDrops"
 local goldDropFolder = Workspace:FindFirstChild(GOLD_DROP_FOLDER_NAME)
@@ -149,6 +155,11 @@ local function onPlayerAdded(player)
                     local killerGold = killerStats and killerStats:FindFirstChild("Gold")
                     if killerGold then
                         killerGold.Value = killerGold.Value + finalReward
+
+                        -- Notify client for colored kill indicator
+                        if KillGoldIndicator then
+                            KillGoldIndicator:FireClient(killer, finalReward)
+                        end
                     end
                 end
             end

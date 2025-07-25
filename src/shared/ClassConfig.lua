@@ -57,6 +57,7 @@ return {
                     Tools = {"Flintlock", "Saber"},
                     Ability = "PowderBomb"
                 },
+                StealGoldMultiplier = 1.5,
             },
         },
     },
@@ -122,7 +123,7 @@ return {
                     Tool = "Blunderbuss",
                     Ability = "PowderBomb",
                 },
-                StealGoldMultiplier = 1.25,
+                StealGoldMultiplier = 1.875,
             },
         },
     },

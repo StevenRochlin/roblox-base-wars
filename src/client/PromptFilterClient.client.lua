@@ -13,10 +13,8 @@ local function updateStealPromptText(prompt)
 		if ownerId == nil or ownerId ~= localPlayer.UserId then
 			-- read your personal steal amount (default to 10)
 			local amt = localPlayer:GetAttribute("StealAmount") or 10
-			-- Apply Pirate class passive bonus ( +50% steal amount ) to the displayed value
-			if localPlayer:GetAttribute("ClassName") == "Pirate" then
-				amt = math.floor(amt * 1.5)
-			end
+			local mult = localPlayer:GetAttribute("StealGoldMultiplier") or 1
+			amt = math.floor(amt * mult)
 			prompt.ActionText = "Steal Gold (" .. amt .. ")"
 		end
 	end
@@ -74,9 +72,7 @@ ProximityPromptService.PromptShown:Connect(function(prompt, inputType)
 	if prompt.Name == "StealPrompt" then
 		-- Update the text immediately before it's rendered
 		local amt = localPlayer:GetAttribute("StealAmount") or 10
-		if localPlayer:GetAttribute("ClassName") == "Pirate" then
-			amt = math.floor(amt * 1.5)
-		end
+		amt = math.floor(amt * (localPlayer:GetAttribute("StealGoldMultiplier") or 1))
 		prompt.ActionText = "Steal Gold (" .. amt .. ")"
 	end
 end)
