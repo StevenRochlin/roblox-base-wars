@@ -178,7 +178,7 @@ player:GetAttributeChangedSignal("ClassTokens"):Connect(updateTokenLabel)
 local archerBtn = Instance.new("TextButton")
 archerBtn.Name = "ArcherButton"
 archerBtn.Size = UDim2.new(0, 120, 0, 60)
-archerBtn.Position = UDim2.new(0, 10, 0, 190)
+archerBtn.Position = UDim2.new(0, -10, 0, 190)
 archerBtn.Text = "Archer"
 archerBtn.TextScaled = true
 archerBtn.Parent = shopFrame
@@ -191,7 +191,7 @@ end)
 local ninjaBtn = Instance.new("TextButton")
 ninjaBtn.Name = "NinjaButton"
 ninjaBtn.Size = UDim2.new(0, 120, 0, 60)
-ninjaBtn.Position = UDim2.new(0, 140, 0, 190)
+ninjaBtn.Position = UDim2.new(0, 120, 0, 190)
 ninjaBtn.Text = "Ninja"
 ninjaBtn.TextScaled = true
 ninjaBtn.Parent = shopFrame
@@ -205,7 +205,7 @@ end)
 local pirateBtn = Instance.new("TextButton")
 pirateBtn.Name = "PirateButton"
 pirateBtn.Size = UDim2.new(0, 120, 0, 60)
-pirateBtn.Position = UDim2.new(0, 270, 0, 190)
+pirateBtn.Position = UDim2.new(0, 250, 0, 190)
 pirateBtn.Text = "Pirate"
 pirateBtn.TextScaled = true
 pirateBtn.Parent = shopFrame
@@ -219,7 +219,7 @@ end)
 local farmerBtn = Instance.new("TextButton")
 farmerBtn.Name = "FarmerButton"
 farmerBtn.Size = UDim2.new(0, 120, 0, 60)
-farmerBtn.Position = UDim2.new(0, 400, 0, 190)
+farmerBtn.Position = UDim2.new(0, 380, 0, 190)
 farmerBtn.Text = "Farmer"
 farmerBtn.TextScaled = true
 farmerBtn.Parent = shopFrame
@@ -240,33 +240,43 @@ local function createSubclassButton(displayName, className, posX, posY)
     btn.Name = className .. "Button"
     btn.Size = UDim2.new(0, 120, 0, 60)
     btn.Position = UDim2.new(0, posX, 0, posY)
-    btn.Text = displayName .. "\n(1 Token)"
+    btn.Text = displayName
     btn.TextWrapped = true
     btn.TextScaled = true
+    -- cost label
+    local costLbl = Instance.new("TextLabel")
+    costLbl.Name = "CostLabel"
+    costLbl.Size = UDim2.new(1,0,0,18)
+    costLbl.Position = UDim2.new(0,0,1,-18)
+    costLbl.BackgroundTransparency = 1
+    costLbl.Font = Enum.Font.SourceSansBold
+    costLbl.TextScaled = true
+    costLbl.Text = "(1 Token)"
+    costLbl.Parent = btn
     btn.Parent = shopFrame
     btn.MouseButton1Click:Connect(function()
         setSelectedItem(displayName, descriptions[className] or "Subclass description.", function()
             RequestClassEquip:FireServer(className, 0)
         end)
     end)
-    table.insert(subclassButtons, {button = btn, ownedAttr = "Owned_" .. className .. "_T0"})
+    table.insert(subclassButtons, {button = btn, costLabel = costLbl, ownedAttr = "Owned_" .. className .. "_T0"})
 end
 
 -- Archer subclasses
-createSubclassButton("Musketeer", "Musketeer", 10, 260)
-createSubclassButton("Ranger", "Ranger", 10, 330)
+createSubclassButton("Musketeer", "Musketeer", -10, 260)
+createSubclassButton("Ranger", "Ranger", -10, 330)
 
 -- Ninja subclasses
-createSubclassButton("Samurai", "Samurai", 140, 260)
-createSubclassButton("Shinobi", "Shinobi", 140, 330)
+createSubclassButton("Samurai", "Samurai", 120, 260)
+createSubclassButton("Shinobi", "Shinobi", 120, 330)
 
 -- Pirate subclasses
-createSubclassButton("Outlaw", "Outlaw", 270, 260)
-createSubclassButton("Buccaneer", "Buccaneer", 270, 330)
+createSubclassButton("Outlaw", "Outlaw", 250, 260)
+createSubclassButton("Buccaneer", "Buccaneer", 250, 330)
 
 -- Farmer subclasses
-createSubclassButton("Nice Farmer", "NiceFarmer", 400, 260)
-createSubclassButton("Toxic Farmer", "ToxicFarmer", 400, 330)
+createSubclassButton("Nice Farmer", "NiceFarmer", 380, 260)
+createSubclassButton("Toxic Farmer", "ToxicFarmer", 380, 330)
 
 -- Function to enable/disable subclass buttons based on tokens
 local function updateSubclassButtons()
@@ -275,8 +285,11 @@ local function updateSubclassButtons()
         local btn = info.button
         local owned = player:GetAttribute(info.ownedAttr) or false
         local enabled = owned or tokens > 0
-        btn.AutoButtonColor = enabled
-        btn.TextColor3 = enabled and Color3.new(1,1,1) or Color3.new(0.6,0.6,0.6)
+        btn.AutoButtonColor = true
+        btn.TextColor3 = Color3.new(1,1,1)
+        if info.costLabel then
+            info.costLabel.TextColor3 = tokens > 0 and Color3.fromRGB(0,255,0) or Color3.fromRGB(255,0,0)
+        end
     end
 end
 updateSubclassButtons()
@@ -284,7 +297,7 @@ player:GetAttributeChangedSignal("ClassTokens"):Connect(updateSubclassButtons)
 
 local fastStealBtn = Instance.new("TextButton")
 fastStealBtn.Size = UDim2.new(0,120,0,60)
-fastStealBtn.Position = UDim2.new(0,140,0,50)
+fastStealBtn.Position = UDim2.new(0,100,0,50)
 fastStealBtn.BackgroundColor3 = purpleColor
 fastStealBtn.BorderSizePixel = 0
 fastStealBtn.Parent = shopFrame
@@ -348,7 +361,7 @@ player:GetAttributeChangedSignal("StealAmount"):Connect(updateStealUpgradeButton
 -- New auto miner upgrade button
 local autoMineBtn = Instance.new("TextButton")
 autoMineBtn.Size = UDim2.new(0,120,0,60)
-autoMineBtn.Position = UDim2.new(0,280,0,50)
+autoMineBtn.Position = UDim2.new(0,240,0,50)
 autoMineBtn.BackgroundColor3 = skyBlueColor
 autoMineBtn.BorderSizePixel = 0
 autoMineBtn.Parent = shopFrame
@@ -412,7 +425,7 @@ player:GetAttributeChangedSignal("MineSpeed"):Connect(updateAutoMineButton)
 -- Entry Time upgrade button
 local entryBtn = Instance.new("TextButton")
 entryBtn.Size = UDim2.new(0,120,0,60)
-entryBtn.Position = UDim2.new(0,0,0,120)
+entryBtn.Position = UDim2.new(0,-20,0,120)
 entryBtn.BackgroundColor3 = turquoiseColor
 entryBtn.BorderSizePixel = 0
 entryBtn.Parent = shopFrame
@@ -474,7 +487,7 @@ player:GetAttributeChangedSignal("EntryLevel"):Connect(updateEntryButton)
 -- Gold Storage upgrade button
 local storageBtn = Instance.new("TextButton")
 storageBtn.Size = UDim2.new(0,120,0,60)
-storageBtn.Position = UDim2.new(0,140,0,120)
+storageBtn.Position = UDim2.new(0,100,0,120)
 storageBtn.BackgroundColor3 = goldColor
 storageBtn.BorderSizePixel = 0
 storageBtn.Parent = shopFrame
@@ -540,7 +553,7 @@ player:GetAttributeChangedSignal("StorageLevel"):Connect(updateStorageButton)
 -- Kill bounty upgrade button
 local bountyBtn = Instance.new("TextButton")
 bountyBtn.Size = UDim2.new(0,120,0,60)
-bountyBtn.Position = UDim2.new(0,0,0,50)
+bountyBtn.Position = UDim2.new(0,-20,0,50)
 bountyBtn.BackgroundColor3 = redColor
 bountyBtn.BorderSizePixel = 0
 bountyBtn.Parent = shopFrame
@@ -1054,22 +1067,28 @@ buyBtn.Parent = infoPanel
 -- Helpers
 local selectedPurchaseFunc = nil
 
-local function updateBuyButton()
-    if selectedPurchaseFunc then
-        buyBtn.BackgroundColor3 = Color3.fromRGB(0,170,0)
-        buyBtn.TextColor3 = Color3.new(1,1,1)
-        buyBtn.AutoButtonColor = true
-    else
-        buyBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-        buyBtn.TextColor3 = Color3.new(0.7,0.7,0.7)
-        buyBtn.AutoButtonColor = false
-    end
-end
+-- Warning label (defined early so referenced later)
+local warningLabel = Instance.new("TextLabel")
+warningLabel.Size = UDim2.new(1,-10,0,20)
+warningLabel.Position = UDim2.new(0,5,1,-60)
+warningLabel.BackgroundTransparency = 1
+warningLabel.TextColor3 = Color3.fromRGB(255,0,0)
+warningLabel.TextScaled = true
+warningLabel.Font = Enum.Font.SourceSansBold
+warningLabel.Text = ""
+warningLabel.Parent = infoPanel
 
 function setSelectedItem(titleStr, descStr, purchaseFunc)
     selectedPurchaseFunc = purchaseFunc
     infoTitle.Text = titleStr
     infoText.Text  = descStr or "(No description)"
+    -- show warning if not enough tokens and title indicates subclass
+    local tokens = player:GetAttribute("ClassTokens") or 0
+    if string.find((descStr or ""):lower(), "subclass", 1, true) and tokens == 0 then
+        warningLabel.Text = "Class Tokens are earned from base storage upgrades past level 3"
+    else
+        warningLabel.Text = ""
+    end
     updateBuyButton()
 end
 
