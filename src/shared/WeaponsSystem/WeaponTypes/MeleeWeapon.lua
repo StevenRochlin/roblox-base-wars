@@ -247,6 +247,18 @@ function MeleeWeapon:_onHandleTouched(part)
     local dmgValObj = self.instance:FindFirstChild("Dmg")
     local damageAmount = dmgValObj and dmgValObj.Value or self:getConfigValue("HitDamage", DEFAULT_MELEE_DAMAGE)
 
+    -- Tag humanoid for kill credit
+    local existingTag = humanoid:FindFirstChild("creator")
+    if not existingTag then
+        local tag = Instance.new("ObjectValue")
+        tag.Name = "creator"
+        tag.Value = self.player
+        tag.Parent = humanoid
+        game.Debris:AddItem(tag, 2)
+    elseif existingTag.Value ~= self.player then
+        existingTag.Value = self.player
+    end
+
     humanoid:TakeDamage(damageAmount)
 
     -- Play hit / stop swing sounds on server so other clients hear
