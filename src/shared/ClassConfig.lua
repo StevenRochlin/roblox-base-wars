@@ -120,7 +120,7 @@ return {
                     WalkSpeed = 16,
                 },
                 Loadout = {
-                    Tool = "Blunderbuss",
+                    Tools = {"Flintlock", "Saber", "Blunderbuss"},
                     Ability = "PowderBomb",
                 },
                 StealGoldMultiplier = 1.875,
