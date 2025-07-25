@@ -185,7 +185,7 @@ archerBtn.Parent = shopFrame
 archerBtn.MouseButton1Click:Connect(function()
     setSelectedItem("Archer", descriptions.Archer, function()
         RequestClassEquip:FireServer("Archer", 0)
-    end)
+    end, true)
 end)
 
 local ninjaBtn = Instance.new("TextButton")
@@ -198,7 +198,7 @@ ninjaBtn.Parent = shopFrame
 ninjaBtn.MouseButton1Click:Connect(function()
     setSelectedItem("Ninja", descriptions.Ninja, function()
         RequestClassEquip:FireServer("Ninja", 0)
-    end)
+    end, true)
 end)
 
 -- Pirate class button
@@ -212,7 +212,7 @@ pirateBtn.Parent = shopFrame
 pirateBtn.MouseButton1Click:Connect(function()
     setSelectedItem("Pirate", descriptions.Pirate, function()
         RequestClassEquip:FireServer("Pirate", 0)
-    end)
+    end, true)
 end)
 
 -- Farmer class button
@@ -226,7 +226,7 @@ farmerBtn.Parent = shopFrame
 farmerBtn.MouseButton1Click:Connect(function()
     setSelectedItem("Farmer", descriptions.Farmer, function()
         RequestClassEquip:FireServer("Farmer", 0)
-    end)
+    end, true)
 end)
 
 -- /////////////////////////////////////////////////////////////////
@@ -255,9 +255,11 @@ local function createSubclassButton(displayName, className, posX, posY)
     costLbl.Parent = btn
     btn.Parent = shopFrame
     btn.MouseButton1Click:Connect(function()
+        local tokens = player:GetAttribute("ClassTokens") or 0
+        local owned = player:GetAttribute("Owned_" .. className .. "_T0") or false
         setSelectedItem(displayName, descriptions[className] or "Subclass description.", function()
             RequestClassEquip:FireServer(className, 0)
-        end)
+        end, (tokens > 0) or owned)
     end)
     table.insert(subclassButtons, {button = btn, costLabel = costLbl, ownedAttr = "Owned_" .. className .. "_T0"})
 end
@@ -343,9 +345,14 @@ levelLabel.TextScaled = true
 levelLabel.Parent = fastStealBtn
 
 fastStealBtn.MouseButton1Click:Connect(function()
+    local amt = player:GetAttribute("StealAmount") or stealBaseIncrement
+    local level = amt / stealBaseIncrement
+    local cost = stealUpgradeCosts[level] or stealUpgradeCosts[#stealUpgradeCosts]
+    local baseGold = (player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("BaseGold"))
+    local afford = baseGold and baseGold.Value >= cost
     setSelectedItem("Steal Amount", descriptions.StealUpgrade, function()
         ChangeStealSpeed:FireServer(stealBaseIncrement)
-    end)
+    end, afford)
 end)
 
 local function updateStealUpgradeButton()
@@ -406,9 +413,15 @@ autoMineCostLabel.TextScaled = true
 autoMineCostLabel.Parent = autoMineBtn
 
 autoMineBtn.MouseButton1Click:Connect(function()
+    local rate = player:GetAttribute("MineSpeed") or 0
+    local level = rate / mineBaseIncrement -- 0-based upgrade count
+    local costIndex = level + 1
+    local cost = mineUpgradeCosts[costIndex] or mineUpgradeCosts[#mineUpgradeCosts]
+    local baseGold = (player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("BaseGold"))
+    local afford = baseGold and baseGold.Value >= cost
     setSelectedItem("Auto Miner", descriptions.AutoMine, function()
         ChangeMineSpeed:FireServer(mineBaseIncrement)
-    end)
+    end, afford)
 end)
 
 local function updateAutoMineButton()
@@ -470,9 +483,13 @@ entryCostLabel.TextScaled = true
 entryCostLabel.Parent = entryBtn
 
 entryBtn.MouseButton1Click:Connect(function()
+    local entryLevel = player:GetAttribute("EntryLevel") or 0
+    local cost = entryUpgradeCosts[entryLevel+1] or entryUpgradeCosts[#entryUpgradeCosts]
+    local baseGold = (player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("BaseGold"))
+    local afford = baseGold and baseGold.Value >= cost
     setSelectedItem("Entry Timer", descriptions.EntryTime, function()
         ChangeEntryTime:FireServer(entryTimeDecrement)
-    end)
+    end, afford)
 end)
 
 local function updateEntryButton()
@@ -532,9 +549,13 @@ storageCostLabel.TextScaled = true
 storageCostLabel.Parent = storageBtn
 
 storageBtn.MouseButton1Click:Connect(function()
+    local storageLevel = player:GetAttribute("StorageLevel") or 1
+    local cost = storageLevels[storageLevel] or storageLevels[#storageLevels]
+    local baseGold = (player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("BaseGold"))
+    local afford = baseGold and baseGold.Value >= cost
     setSelectedItem("Max Storage", descriptions.Storage, function()
         ChangeStorageSize:FireServer()
-    end)
+    end, afford)
 end)
 
 local function updateStorageButton()
@@ -597,9 +618,15 @@ bountyCostLabel.TextScaled = true
 bountyCostLabel.Parent = bountyBtn
 
 bountyBtn.MouseButton1Click:Connect(function()
+    local reward = player:GetAttribute("KillBountyReward") or 15
+    local level = 0
+    for idx,val in ipairs(killBountyRewards) do if val==reward then level=idx end end
+    local cost = killBountyCosts[level+1] or killBountyCosts[#killBountyCosts]
+    local baseGold = (player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("BaseGold"))
+    local afford = baseGold and baseGold.Value >= cost
     setSelectedItem("Kill Bounty", descriptions.KillBounty, function()
         ChangeKillBounty:FireServer()
-    end)
+    end, afford)
 end)
 
 local function updateBountyButton()
@@ -1065,6 +1092,7 @@ buyBtn.Parent = infoPanel
 
 -- Helpers
 local selectedPurchaseFunc = nil
+local selectedCanAfford = false
 
 -- Warning label (defined early so referenced later)
 local warningLabel = Instance.new("TextLabel")
@@ -1077,8 +1105,25 @@ warningLabel.Font = Enum.Font.SourceSansBold
 warningLabel.Text = ""
 warningLabel.Parent = infoPanel
 
-function setSelectedItem(titleStr, descStr, purchaseFunc)
+-- Update BUY button color/state
+local function updateBuyButton()
+    if not selectedPurchaseFunc then
+        buyBtn.BackgroundColor3 = Color3.fromRGB(80,80,80) -- grey
+        buyBtn.TextColor3 = Color3.new(0.7,0.7,0.7)
+        return
+    end
+
+    if selectedCanAfford then
+        buyBtn.BackgroundColor3 = Color3.fromRGB(0,170,0) -- green
+    else
+        buyBtn.BackgroundColor3 = Color3.fromRGB(170,0,0) -- red
+    end
+    buyBtn.TextColor3 = Color3.new(1,1,1)
+end
+
+function setSelectedItem(titleStr, descStr, purchaseFunc, canAfford)
     selectedPurchaseFunc = purchaseFunc
+    selectedCanAfford = canAfford
     infoTitle.Text = titleStr
     infoText.Text  = descStr or "(No description)"
     -- show warning if not enough tokens and title indicates subclass
@@ -1093,6 +1138,7 @@ end
 
 function clearSelection()
     selectedPurchaseFunc = nil
+    selectedCanAfford = false
     infoTitle.Text = "Select an item"
     infoText.Text  = "Click an item on the left to see details."
     updateBuyButton()
@@ -1105,7 +1151,14 @@ buyBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-updateBuyButton()
+-- When ClassTokens changes, if a subclass is selected, refresh affordability
+player:GetAttributeChangedSignal("ClassTokens"):Connect(function()
+    if selectedPurchaseFunc and string.find(infoTitle.Text, "Musketeer") or string.find(infoTitle.Text, "Ranger") or string.find(infoTitle.Text, "Samurai") or string.find(infoTitle.Text, "Shinobi") or string.find(infoTitle.Text, "Outlaw") or string.find(infoTitle.Text, "Buccaneer") or string.find(infoTitle.Text, "Farmer", 1, true) then
+        local tokens = player:GetAttribute("ClassTokens") or 0
+        selectedCanAfford = tokens > 0 or (player:GetAttribute("Owned_" .. infoTitle.Text:gsub(" ","") .. "_T0") or false)
+        updateBuyButton()
+    end
+end)
 
 --- END selection system implementation
 
