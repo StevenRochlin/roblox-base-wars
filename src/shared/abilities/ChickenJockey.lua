@@ -7,10 +7,10 @@ local ChickenJockey = {}
 
 ChickenJockey.Cooldown  = 15 -- seconds between uses
 ChickenJockey.Duration  = 25 -- lifetime of the summon
-ChickenJockey.Damage    = 10 -- damage per hit
-ChickenJockey.HitRadius = 4  -- studs for melee hit
-ChickenJockey.Health    = 100
-ChickenJockey.Speed     = 19  -- walk speed
+ChickenJockey.Damage    = 16 -- damage per hit
+ChickenJockey.HitRadius = 5  -- studs for melee hit
+ChickenJockey.Health    = 125
+ChickenJockey.Speed     = 20  -- walk speed
 
 -- /////////////////////////////////////////////////////////////////
 local lastUse = {}
